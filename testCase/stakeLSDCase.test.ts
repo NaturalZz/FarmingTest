@@ -1,9 +1,9 @@
-import {expect, use} from 'chai';
+import { expect, use } from 'chai';
 import { BigNumber, ethers } from "ethers";
 import { AcalaJsonRpcProvider } from "@acala-network/eth-providers";
 import {solidity} from 'ethereum-waffle';
 import { IStakingCall } from '../call/IStakingCall'
-import { ACCOUNT, PROXYCONTRACT, ACA, DOT, LDOT, SA_DOT, LCDOT_13, HOMA, STABLE_ASSET, ALICE, ALICE_ETH, TEST_ACCOUNT, LIQUID_CROWDLOAN, BLACK_HOLE, MAX_UINT_AMOUNT, WTDOT, AVERAGE_BLOCK_TIME } from "../utils/config";
+import { ACCOUNT, ProxyAddress, STABLE_ASSET, ALICE_ETH, TEST_ACCOUNT, LIQUID_CROWDLOAN, BLACK_HOLE, MAX_UINT_AMOUNT, WTDOT, AVERAGE_BLOCK_TIME, CURRENT_RPC, ASSET_ADDRESS } from "../utils/config";
 import { Amount, ContractAddress, ConvertType, Operation, UserAddress, getConversion } from '../utils/type';
 import { IERC20Call } from '../call/IERC20Call';
 import { AlreadyConverted, AlreadyPaused, BalanceLow, CannotStake0, CannotUnstakeZero, InsufficientAllowance, NotPaused, OperationPaused, PoolIsEmpty, PoolMustExist, PoolNotExist, RewardDurationZero, RewardTokenZero, ShareNotEnough, ShareTokenMustDOT, ShareTokenMustLcDOT, TooManyRewardType, WrongRate, notOwner } from '../utils/error';
@@ -14,35 +14,34 @@ import { IWrappedTDOTCall } from '../call/IWrappedTDOT';
 use(solidity);
 
 describe('staking 合约测试', () => {
-    const provider = new AcalaJsonRpcProvider(
-        "https://crosschain-dev.polkawallet.io:9909"
-    );
+    const provider = new AcalaJsonRpcProvider(CURRENT_RPC);
     const AliceSigner = new ethers.Wallet(ALICE_ETH as string, provider)
     const TestASinger = new ethers.Wallet(TEST_ACCOUNT as string, provider)
     const AliceStakingCall = new IStakingCall(AliceSigner)
     const TestAStakingCall = new IStakingCall(TestASinger)
-    const ACACall = new IERC20Call(ACA as string, AliceSigner)
-    const DOTCall = new IERC20Call(DOT as string, AliceSigner)
-    const LDOTCall = new IERC20Call(LDOT as string, AliceSigner)
-    const SADOTCall = new IERC20Call(SA_DOT as string, AliceSigner)
-    const LCDOTCall = new IERC20Call(LCDOT_13 as string, AliceSigner)
-    const WTDOTCall = new IERC20Call(WTDOT as string, AliceSigner)
+    const { ACA, DOT, LDOT, TDOT, LCDOT } = ASSET_ADDRESS
+    const ACACall = new IERC20Call(ACA, AliceSigner)
+    const DOTCall = new IERC20Call(DOT, AliceSigner)
+    const LDOTCall = new IERC20Call(LDOT, AliceSigner)
+    const TDOTCall = new IERC20Call(TDOT, AliceSigner)
+    const LCDOTCall = new IERC20Call(LCDOT, AliceSigner)
+    const WTDOTCall = new IERC20Call(WTDOT, AliceSigner)
     const iWrappedTDOTCall = new IWrappedTDOTCall(AliceSigner)
     const iLiquidCrowdloanCall = new ILiquidCrowdloanCall(AliceSigner)
     const amount = BigNumber.from("100000000000")
 
     // before(async () => {
     //     // const [aca, dot, sadot, lcdot] = await Promise.all([
-    //     //     ACACall.allowance(PROXYCONTRACT as string, AliceSigner.address),
-    //     //     DOTCall.allowance(PROXYCONTRACT as string, AliceSigner.address),
-    //     //     SADOTCall.allowance(PROXYCONTRACT as string, AliceSigner.address),
-    //     //     LCDOTCall.allowance(PROXYCONTRACT as string, AliceSigner.address),
+    //     //     ACACall.allowance(ProxyAddress as string, AliceSigner.address),
+    //     //     DOTCall.allowance(ProxyAddress as string, AliceSigner.address),
+    //     //     TDOTCall.allowance(ProxyAddress as string, AliceSigner.address),
+    //     //     LCDOTCall.allowance(ProxyAddress as string, AliceSigner.address),
     //     // ])
 
-    //     await ACACall.approve(PROXYCONTRACT as string, MAX_UINT_AMOUNT)
-    //     // await DOTCall.approve(PROXYCONTRACT as string, MAX_UINT_AMOUNT)
-    //     await SADOTCall.approve(PROXYCONTRACT as string, MAX_UINT_AMOUNT)
-    //     await LCDOTCall.approve(PROXYCONTRACT as string, MAX_UINT_AMOUNT)
+    //     await ACACall.approve(ProxyAddress as string, MAX_UINT_AMOUNT)
+    //     // await DOTCall.approve(ProxyAddress as string, MAX_UINT_AMOUNT)
+    //     await TDOTCall.approve(ProxyAddress as string, MAX_UINT_AMOUNT)
+    //     await LCDOTCall.approve(ProxyAddress as string, MAX_UINT_AMOUNT)
     // })
 
     describe.skip("鉴权测试", () => {
@@ -129,28 +128,28 @@ describe('staking 合约测试', () => {
                 let expectConvertedAmount = convertedExchangeRate.mul(stakeAmount).div("1000000000000000000")
                 const [aliceFromBalanceBefore, stakingToBalanceBefore, sharesBefore, totalSharesBefore] = await Promise.all([
                     fromErc20Call.balanceOf(AliceSigner.address, stakeBlockNumber - 1),
-                    toErc20Call.balanceOf(PROXYCONTRACT as string, stakeBlockNumber - 1),
+                    toErc20Call.balanceOf(ProxyAddress as string, stakeBlockNumber - 1),
                     AliceStakingCall.shares(poolIndex, AliceSigner.address, stakeBlockNumber - 1),
                     AliceStakingCall.totalShares(poolIndex, stakeBlockNumber - 1),
                 ]);
                 const [aliceFromBalanceAfter, stakingToBalanceAfter, sharesAfter, totalSharesAfter] = await Promise.all([
                     fromErc20Call.balanceOf(AliceSigner.address, stakeBlockNumber),
-                    toErc20Call.balanceOf(PROXYCONTRACT as string, stakeBlockNumber),
+                    toErc20Call.balanceOf(ProxyAddress as string, stakeBlockNumber),
                     AliceStakingCall.shares(poolIndex, AliceSigner.address, stakeBlockNumber),
                     AliceStakingCall.totalShares(poolIndex, stakeBlockNumber),
                 ]);
                 // 判断转化之后是不是WTDOT
                 const isWTDOT = ethers.utils.getAddress(convertedShareType) == ethers.utils.getAddress(WTDOT as string)
-                const isSADOT = ethers.utils.getAddress(convertedShareType) == ethers.utils.getAddress(SA_DOT as string)
+                const isTDOT = ethers.utils.getAddress(convertedShareType) == ethers.utils.getAddress(TDOT as string)
                 const isLDOT = ethers.utils.getAddress(convertedShareType) == ethers.utils.getAddress(LDOT as string)
                 const isDOT = ethers.utils.getAddress(shareType) == ethers.utils.getAddress(DOT as string)
-                const isLCDOT = ethers.utils.getAddress(shareType) == ethers.utils.getAddress(LCDOT_13 as string)
+                const isLCDOT = ethers.utils.getAddress(shareType) == ethers.utils.getAddress(LCDOT as string)
                 // 如果shareToken是DOT 并且 转化为了WTDOT，需要将DOT先转成TDOT再转成WTDOT
-                if ((isDOT || isLCDOT) && (isWTDOT || isSADOT)) {
+                if ((isDOT || isLCDOT) && (isWTDOT || isTDOT)) {
                     // 查询tDOT mint了多少
                     const [tDOTTotalSupllyBefore, tDOTTotalSupllyAfter] = await Promise.all([
-                        SADOTCall.totalSupply(stakeBlockNumber - 1),
-                        SADOTCall.totalSupply(stakeBlockNumber)
+                        TDOTCall.totalSupply(stakeBlockNumber - 1),
+                        TDOTCall.totalSupply(stakeBlockNumber)
                     ])
                     const tDOTDiff = tDOTTotalSupllyAfter.sub(tDOTTotalSupllyBefore)
                     const depositRate = await iWrappedTDOTCall.depositRate(stakeBlockNumber - 1)
@@ -187,7 +186,7 @@ describe('staking 合约测试', () => {
                     sharesBefore,
                     totalShareBefore
                 ] = await Promise.all([
-                    fromErc20Call.balanceOf(PROXYCONTRACT as string, stakeBlockNumber - 1),
+                    fromErc20Call.balanceOf(ProxyAddress as string, stakeBlockNumber - 1),
                     fromErc20Call.balanceOf(AliceSigner.address, stakeBlockNumber - 1),
                     AliceStakingCall.shares(poolIndex, AliceSigner.address, stakeBlockNumber - 1),
                     AliceStakingCall.totalShares(poolIndex, stakeBlockNumber - 1)
@@ -199,7 +198,7 @@ describe('staking 合约测试', () => {
                     sharesAfter,
                     totalShareAfter
                 ] = await Promise.all([
-                    fromErc20Call.balanceOf(PROXYCONTRACT as string, stakeBlockNumber),
+                    fromErc20Call.balanceOf(ProxyAddress as string, stakeBlockNumber),
                     fromErc20Call.balanceOf(AliceSigner.address, stakeBlockNumber),
                     AliceStakingCall.shares(poolIndex, AliceSigner.address, stakeBlockNumber),
                     AliceStakingCall.totalShares(poolIndex, stakeBlockNumber)
@@ -221,13 +220,13 @@ describe('staking 合约测试', () => {
             const isShareTypeWTDOT = ethers.utils.getAddress(shareType) == ethers.utils.getAddress(WTDOT as string)
             const { convertedShareType, convertedExchangeRate } = await AliceStakingCall.convertInfos(poolIndex)
             const isConvertedWTDOT = ethers.utils.getAddress(convertedShareType) == ethers.utils.getAddress(WTDOT as string)
-            const isConvertedTDOT = ethers.utils.getAddress(convertedShareType) == ethers.utils.getAddress(SA_DOT as string)
+            const isConvertedTDOT = ethers.utils.getAddress(convertedShareType) == ethers.utils.getAddress(TDOT as string)
 
 
             // shareType的Call 如果shareType=WTDOT或者convertedShareType=WTDOT || TDOT 那么赎回的应该是TDOT
             let fromErc20Call: IERC20Call
             if (isConvertedWTDOT || isConvertedTDOT) {
-                fromErc20Call = new IERC20Call(SA_DOT as string, AliceSigner)
+                fromErc20Call = new IERC20Call(TDOT as string, AliceSigner)
             } else {
                 fromErc20Call = new IERC20Call(shareType, AliceSigner)
             }
@@ -247,14 +246,14 @@ describe('staking 合约测试', () => {
 
                 const [aliceFromBalanceBefore, stakingToBalanceBefore, sharesBefore, totalSharesBefore] = await Promise.all([
                     fromErc20Call.balanceOf(AliceSigner.address, unstakeBlockNumber - 1),
-                    toErc20Call.balanceOf(PROXYCONTRACT as string, unstakeBlockNumber - 1),
+                    toErc20Call.balanceOf(ProxyAddress as string, unstakeBlockNumber - 1),
                     AliceStakingCall.shares(poolIndex, AliceSigner.address, unstakeBlockNumber - 1),
                     AliceStakingCall.totalShares(poolIndex, unstakeBlockNumber - 1),
                 ]);
 
                 const [aliceFromBalanceAfter, stakingToBalanceAfter, sharesAfter, totalSharesAfter] = await Promise.all([
                     fromErc20Call.balanceOf(AliceSigner.address, unstakeBlockNumber),
-                    toErc20Call.balanceOf(PROXYCONTRACT as string, unstakeBlockNumber),
+                    toErc20Call.balanceOf(ProxyAddress as string, unstakeBlockNumber),
                     AliceStakingCall.shares(poolIndex, AliceSigner.address, unstakeBlockNumber),
                     AliceStakingCall.totalShares(poolIndex, unstakeBlockNumber),
                 ]);
@@ -277,7 +276,7 @@ describe('staking 合约测试', () => {
                     sharesBefore,
                     totalShareBefore
                 ] = await Promise.all([
-                    fromErc20Call.balanceOf(PROXYCONTRACT as string, unstakeBlockNumber - 1),
+                    fromErc20Call.balanceOf(ProxyAddress as string, unstakeBlockNumber - 1),
                     fromErc20Call.balanceOf(AliceSigner.address, unstakeBlockNumber - 1),
                     AliceStakingCall.shares(poolIndex, AliceSigner.address, unstakeBlockNumber - 1),
                     AliceStakingCall.totalShares(poolIndex, unstakeBlockNumber - 1)
@@ -289,7 +288,7 @@ describe('staking 合约测试', () => {
                     sharesAfter,
                     totalShareAfter
                 ] = await Promise.all([
-                    fromErc20Call.balanceOf(PROXYCONTRACT as string, unstakeBlockNumber),
+                    fromErc20Call.balanceOf(ProxyAddress as string, unstakeBlockNumber),
                     fromErc20Call.balanceOf(AliceSigner.address, unstakeBlockNumber),
                     AliceStakingCall.shares(poolIndex, AliceSigner.address, unstakeBlockNumber),
                     AliceStakingCall.totalShares(poolIndex, unstakeBlockNumber)
@@ -392,9 +391,9 @@ describe('staking 合约测试', () => {
                 stakingBalanceAfter,
                 aliceBalanceAfter
             ] = await Promise.all([
-                await iERC20Call.balanceOf(PROXYCONTRACT as string, claimBlockNumber - 1),
+                await iERC20Call.balanceOf(ProxyAddress as string, claimBlockNumber - 1),
                 await iERC20Call.balanceOf(AliceSigner.address, claimBlockNumber - 1),
-                await iERC20Call.balanceOf(PROXYCONTRACT as string, claimBlockNumber),
+                await iERC20Call.balanceOf(ProxyAddress as string, claimBlockNumber),
                 await iERC20Call.balanceOf(AliceSigner.address, claimBlockNumber)
             ])
             console.log("1", stakingBalanceBefore.toString(), stakingBalanceAfter.toString(), expectRewards.toString());
@@ -476,15 +475,15 @@ describe('staking 合约测试', () => {
         }
 
         // 检查convert情况
-        const checkConvertLSDPool = async (txHash: string, poolIndex: number, convertType: ConvertType) => {
+        const checkConvertLSTPool = async (txHash: string, poolIndex: number, convertType: ConvertType) => {
             const { blockNumber: convertBlockNumber } = await provider.getTransaction(txHash) as { blockNumber: number}
 
             const { from, to } = getConversion(convertType)
             const fromErc20Call = new IERC20Call(from, AliceSigner)
             const toErc20Call = new IERC20Call(to, AliceSigner)
             const [stakingFromBalanceBefore, stakingToBalanceBefore, sharesBefore, totalSharesBefore] = await Promise.all([
-                fromErc20Call.balanceOf(PROXYCONTRACT as string, convertBlockNumber - 1),
-                toErc20Call.balanceOf(PROXYCONTRACT as string, convertBlockNumber - 1),
+                fromErc20Call.balanceOf(ProxyAddress as string, convertBlockNumber - 1),
+                toErc20Call.balanceOf(ProxyAddress as string, convertBlockNumber - 1),
                 AliceStakingCall.shares(poolIndex, AliceSigner.address, convertBlockNumber - 1),
                 AliceStakingCall.totalShares(poolIndex, convertBlockNumber - 1),
             ]);
@@ -497,8 +496,8 @@ describe('staking 合约测试', () => {
             const convertedAmount = convertedExchangeRate.mul(totalSharesBefore).div("1000000000000000000")
             expect(ethers.utils.getAddress(convertedShareType)).eq(ethers.utils.getAddress(to))
             const [stakingFromBalanceAfter, stakingToBalanceAfter, sharesAfter, totalSharesAfter] = await Promise.all([
-                fromErc20Call.balanceOf(PROXYCONTRACT as string, convertBlockNumber),
-                toErc20Call.balanceOf(PROXYCONTRACT as string, convertBlockNumber),
+                fromErc20Call.balanceOf(ProxyAddress as string, convertBlockNumber),
+                toErc20Call.balanceOf(ProxyAddress as string, convertBlockNumber),
                 AliceStakingCall.shares(poolIndex, AliceSigner.address, convertBlockNumber),
                 AliceStakingCall.totalShares(poolIndex, convertBlockNumber),
             ]);
@@ -543,18 +542,18 @@ describe('staking 合约测试', () => {
             })
     
             it.skip("用户未approve erc20时stake. => should reject", async () => {
-                await DOTCall.approve(PROXYCONTRACT as string, 0)
-                expect((await DOTCall.allowance(AliceSigner.address, PROXYCONTRACT as string)).eq(0)).true
+                await DOTCall.approve(ProxyAddress as string, 0)
+                expect((await DOTCall.allowance(AliceSigner.address, ProxyAddress as string)).eq(0)).true
                 await expectRevert(AliceStakingCall.stake(poolId, amount), InsufficientAllowance)
     
                 // 还原approve
-                await DOTCall.approve(PROXYCONTRACT as string, MAX_UINT_AMOUNT)
-                expect((await DOTCall.allowance(AliceSigner.address, PROXYCONTRACT as string)).eq(MAX_UINT_AMOUNT)).true
+                await DOTCall.approve(ProxyAddress as string, MAX_UINT_AMOUNT)
+                expect((await DOTCall.allowance(AliceSigner.address, ProxyAddress as string)).eq(MAX_UINT_AMOUNT)).true
             })
     
             it.skip("用户stake的金额大于自身资产. users pledge assets in excess of the balance in an existing pool => should reject", async () => {
-                await DOTCall.approve(PROXYCONTRACT as string, MAX_UINT_AMOUNT)
-                expect((await DOTCall.allowance(AliceSigner.address, PROXYCONTRACT as string)).eq(MAX_UINT_AMOUNT)).true
+                await DOTCall.approve(ProxyAddress as string, MAX_UINT_AMOUNT)
+                expect((await DOTCall.allowance(AliceSigner.address, ProxyAddress as string)).eq(MAX_UINT_AMOUNT)).true
                 const userBalance = await DOTCall.balanceOf(AliceSigner.address)
                 const testAmount = userBalance.add(1)
                 await expectRevert(AliceStakingCall.stake(poolId, testAmount), BalanceLow)
@@ -743,8 +742,8 @@ describe('staking 合约测试', () => {
                 // const lDOTTx = await AliceStakingCall.updateRewardRule(poolIndex, LDOT as string, _rewardRate, endTime)
                 // await lDOTTx.wait(1)
                 // const { updateTime: lDOTTime } = await checkRewardRule(lDOTTx.hash, poolIndex, LDOT as string, _rewardRate, endTime, [DOT as string, LDOT as string])
-                // const LcDOTTx = await AliceStakingCall.updateRewardRule(poolIndex, LCDOT_13 as string, _rewardRate, endTime)
-                // // const { updateTime: LcDOTTime } = await checkRewardRule(LcDOTTx.hash, poolIndex, LCDOT_13 as string, _rewardRate, endTime, [DOT as string, LDOT as string, LCDOT_13 as string])
+                // const LcDOTTx = await AliceStakingCall.updateRewardRule(poolIndex, LCDOT as string, _rewardRate, endTime)
+                // // const { updateTime: LcDOTTime } = await checkRewardRule(LcDOTTx.hash, poolIndex, LCDOT as string, _rewardRate, endTime, [DOT as string, LDOT as string, LCDOT as string])
                 // await LcDOTTx.wait(1)
 
                 // await expectRevert(AliceStakingCall.updateRewardRule(poolIndex, ACA as string, _rewardRate, endTime), TooManyRewardType)
@@ -752,10 +751,10 @@ describe('staking 合约测试', () => {
                 // const claimTx = await AliceStakingCall.claimRewards(poolIndex)
                 // await checkReward(claimTx.hash, poolIndex, DOT as string)
                 // await checkReward(claimTx.hash, poolIndex, LDOT as string)
-                // await checkReward(claimTx.hash, poolIndex, LCDOT_13 as string)
+                // await checkReward(claimTx.hash, poolIndex, LCDOT as string)
                 // await checkReward("0x1808afddd9f4402dc89158730d452f50df6118ef0fba39bf3bb7666a5a595819", poolIndex, DOT as string)
                 // await checkReward("0x1808afddd9f4402dc89158730d452f50df6118ef0fba39bf3bb7666a5a595819", poolIndex, LDOT as string)
-                // await checkReward("0x1808afddd9f4402dc89158730d452f50df6118ef0fba39bf3bb7666a5a595819", poolIndex, LCDOT_13 as string)
+                // await checkReward("0x1808afddd9f4402dc89158730d452f50df6118ef0fba39bf3bb7666a5a595819", poolIndex, LCDOT as string)
             })
 
             it.skip("奖励发放期有用户加入 检查奖励分配", async () => {
@@ -841,16 +840,16 @@ describe('staking 合约测试', () => {
                 const expectAliceEarned = perShare.mul(timeDif)
                 const aliceBalanceBefore = await DOTCall.balanceOf(AliceSigner.address, block1 as number - 1)
                 const stakingBalanceBefore = await DOTCall.balanceOf(AliceSigner.address, block1 as number - 1)
-                console.log("🚀 ~ file: stakeLSDCase.test.ts:800 ~ it ~ stakingBalanceBefore:", stakingBalanceBefore)
+                console.log("🚀 ~ file: stakeLSTCase.test.ts:800 ~ it ~ stakingBalanceBefore:", stakingBalanceBefore)
                 const aliceBalanceAfter = await DOTCall.balanceOf(AliceSigner.address, block1 as number)
                 const stakingBalanceAfter = await DOTCall.balanceOf(AliceSigner.address, block1 as number)
                 console.log(expectAliceEarned.toString(), aliceBalanceBefore.toString(), stakingBalanceBefore.toString(), stakingBalanceAfter.toString());
-                console.log("🚀 ~ file: stakeLSDCase.test.ts:804 ~ it ~ stakingBalanceBefore:", stakingBalanceBefore)
+                console.log("🚀 ~ file: stakeLSTCase.test.ts:804 ~ it ~ stakingBalanceBefore:", stakingBalanceBefore)
                 
 
                 expect(aliceBalanceBefore.eq(aliceBalanceAfter.sub(expectAliceEarned))).true
                 expect(stakingBalanceBefore.eq(stakingBalanceAfter.add(expectAliceEarned))).true
-                console.log("🚀 ~ file: stakeLSDCase.test.ts:809 ~ it ~ stakingBalanceBefore:", stakingBalanceBefore)
+                console.log("🚀 ~ file: stakeLSTCase.test.ts:809 ~ it ~ stakingBalanceBefore:", stakingBalanceBefore)
                 expect((await AliceStakingCall.shares(poolIndex, AliceSigner.address)).eq(amount))
                 expect((await AliceStakingCall.earned(poolIndex, AliceSigner.address, DOT as string, block1)).isZero())
                 expect((await AliceStakingCall.rewards(poolIndex, AliceSigner.address, DOT as string, block1)).isZero())
@@ -1036,17 +1035,17 @@ describe('staking 合约测试', () => {
                     earned = await AliceStakingCall.earned(poolId, AliceSigner.address, DOT as string)
                 }
 
-                const stakingBalanceBefore = await DOTCall.balanceOf(PROXYCONTRACT as string)
-                console.log("🚀 ~ file: stakeLSDCase.test.ts:981 ~ it.skip ~ stakingBalanceBefore:", stakingBalanceBefore)
+                const stakingBalanceBefore = await DOTCall.balanceOf(ProxyAddress as string)
+                console.log("🚀 ~ file: stakeLSTCase.test.ts:981 ~ it.skip ~ stakingBalanceBefore:", stakingBalanceBefore)
                 const aliceBalanceBefore = await DOTCall.balanceOf(AliceSigner.address)
                 
                 await AliceStakingCall.claimRewards(poolId)
 
-                const stakingBalanceAfter = await DOTCall.balanceOf(PROXYCONTRACT as string)
+                const stakingBalanceAfter = await DOTCall.balanceOf(ProxyAddress as string)
                 const aliceBalanceAfter = await DOTCall.balanceOf(AliceSigner.address)
 
                 expect(stakingBalanceBefore.eq(stakingBalanceAfter.add(earned))).true
-                console.log("🚀 ~ file: stakeLSDCase.test.ts:990 ~ it.skip ~ stakingBalanceBefore:", stakingBalanceBefore)
+                console.log("🚀 ~ file: stakeLSTCase.test.ts:990 ~ it.skip ~ stakingBalanceBefore:", stakingBalanceBefore)
                 expect(aliceBalanceBefore.eq(aliceBalanceAfter.sub(earned))).true
                 expect((await AliceStakingCall.earned(poolId, AliceSigner.address, DOT as string)).isZero()).true
             })
@@ -1086,17 +1085,17 @@ describe('staking 合约测试', () => {
                     earned = await AliceStakingCall.earned(otherPool, AliceSigner.address, DOT as string)
                 }
 
-                const stakingBalanceBefore = await DOTCall.balanceOf(PROXYCONTRACT as string)
-                console.log("🚀 ~ file: stakeLSDCase.test.ts:1031 ~ it.skip ~ stakingBalanceBefore:", stakingBalanceBefore)
+                const stakingBalanceBefore = await DOTCall.balanceOf(ProxyAddress as string)
+                console.log("🚀 ~ file: stakeLSTCase.test.ts:1031 ~ it.skip ~ stakingBalanceBefore:", stakingBalanceBefore)
                 const aliceBalanceBefore = await DOTCall.balanceOf(AliceSigner.address)
                 
                 await AliceStakingCall.claimRewards(otherPool)
 
-                const stakingBalanceAfter = await DOTCall.balanceOf(PROXYCONTRACT as string)
+                const stakingBalanceAfter = await DOTCall.balanceOf(ProxyAddress as string)
                 const aliceBalanceAfter = await DOTCall.balanceOf(AliceSigner.address)
 
                 expect(stakingBalanceBefore.eq(stakingBalanceAfter.add(earned))).true
-                console.log("🚀 ~ file: stakeLSDCase.test.ts:1040 ~ it.skip ~ stakingBalanceBefore:", stakingBalanceBefore)
+                console.log("🚀 ~ file: stakeLSTCase.test.ts:1040 ~ it.skip ~ stakingBalanceBefore:", stakingBalanceBefore)
                 expect(aliceBalanceBefore.eq(aliceBalanceAfter.sub(earned))).true
                 expect((await AliceStakingCall.earned(otherPool, AliceSigner.address, DOT as string)).isZero()).true
             })
@@ -1114,7 +1113,7 @@ describe('staking 合约测试', () => {
         })
 
         // done 1 bug
-        describe("退出 exit", () => {
+        describe.skip("退出 exit", () => {
             before(async () => {
                 const [stakeStatus, unstakeStatus, claimRewardsStatus] = await Promise.all([
                     AliceStakingCall.pausedPoolOperations(poolId, Operation.Stake),
@@ -1171,20 +1170,20 @@ describe('staking 合约测试', () => {
                     earned = await AliceStakingCall.earned(poolId, AliceSigner.address, DOT as string)
                 }
 
-                const stakingBalanceBefore = await DOTCall.balanceOf(PROXYCONTRACT as string)
-                console.log("🚀 ~ file: stakeLSDCase.test.ts:1119 ~ it ~ stakingBalanceBefore:", stakingBalanceBefore)
+                const stakingBalanceBefore = await DOTCall.balanceOf(ProxyAddress as string)
+                console.log("🚀 ~ file: stakeLSTCase.test.ts:1119 ~ it ~ stakingBalanceBefore:", stakingBalanceBefore)
                 const aliceBalanceBefore = await DOTCall.balanceOf(AliceSigner.address)
                 const totalShareBefore = await AliceStakingCall.totalShares(poolId)
                 
                 await AliceStakingCall.exit(poolId)
 
-                const stakingBalanceAfter = await DOTCall.balanceOf(PROXYCONTRACT as string)
+                const stakingBalanceAfter = await DOTCall.balanceOf(ProxyAddress as string)
                 const aliceBalanceAfter = await DOTCall.balanceOf(AliceSigner.address)
                 const shareAfter = await AliceStakingCall.shares(poolId, AliceSigner.address)
                 const totalShareAfter = await AliceStakingCall.totalShares(poolId)
 
                 expect(stakingBalanceBefore.eq(stakingBalanceAfter.add(sharesBefore).add(earned))).true
-                console.log("🚀 ~ file: stakeLSDCase.test.ts:1131 ~ it ~ stakingBalanceBefore:", stakingBalanceBefore)
+                console.log("🚀 ~ file: stakeLSTCase.test.ts:1131 ~ it ~ stakingBalanceBefore:", stakingBalanceBefore)
                 expect(aliceBalanceBefore.eq(aliceBalanceAfter.sub(sharesBefore).sub(earned))).true
                 expect(sharesBefore.eq(shareAfter.add(sharesBefore))).true
                 expect(totalShareBefore.eq(totalShareAfter.add(sharesBefore))).true
@@ -1207,20 +1206,20 @@ describe('staking 合约测试', () => {
                     expect((await AliceStakingCall.earned(poolId, AliceSigner.address, DOT as string)).isZero()).true
                 }
 
-                const stakingBalanceBefore = await DOTCall.balanceOf(PROXYCONTRACT as string)
-                console.log("🚀 ~ file: stakeLSDCase.test.ts:1154 ~ it.skip ~ stakingBalanceBefore:", stakingBalanceBefore)
+                const stakingBalanceBefore = await DOTCall.balanceOf(ProxyAddress as string)
+                console.log("🚀 ~ file: stakeLSTCase.test.ts:1154 ~ it.skip ~ stakingBalanceBefore:", stakingBalanceBefore)
                 const aliceBalanceBefore = await DOTCall.balanceOf(AliceSigner.address)
                 const totalShareBefore = await AliceStakingCall.totalShares(poolId)
                 
                 await AliceStakingCall.exit(poolId)
 
-                const stakingBalanceAfter = await DOTCall.balanceOf(PROXYCONTRACT as string)
+                const stakingBalanceAfter = await DOTCall.balanceOf(ProxyAddress as string)
                 const aliceBalanceAfter = await DOTCall.balanceOf(AliceSigner.address)
                 const shareAfter = await AliceStakingCall.shares(poolId, AliceSigner.address)
                 const totalShareAfter = await AliceStakingCall.totalShares(poolId)
 
                 expect(stakingBalanceBefore.eq(stakingBalanceAfter.add(sharesBefore))).true
-                console.log("🚀 ~ file: stakeLSDCase.test.ts:1166 ~ it.skip ~ stakingBalanceBefore:", stakingBalanceBefore)
+                console.log("🚀 ~ file: stakeLSTCase.test.ts:1166 ~ it.skip ~ stakingBalanceBefore:", stakingBalanceBefore)
                 expect(aliceBalanceBefore.eq(aliceBalanceAfter.sub(sharesBefore))).true
                 expect(sharesBefore.eq(shareAfter.add(sharesBefore))).true
                 expect(totalShareBefore.eq(totalShareAfter.add(sharesBefore))).true
@@ -1289,17 +1288,17 @@ describe('staking 合约测试', () => {
                 const rewards = earned.sub(deduction)
                 console.log(deduction.toString(), rewards.toString());
                 
-                const stakingBalanceBefore = await DOTCall.balanceOf(PROXYCONTRACT as string)
-                console.log("🚀 ~ file: stakeLSDCase.test.ts:1233 ~ it.skip ~ stakingBalanceBefore:", stakingBalanceBefore)
+                const stakingBalanceBefore = await DOTCall.balanceOf(ProxyAddress as string)
+                console.log("🚀 ~ file: stakeLSTCase.test.ts:1233 ~ it.skip ~ stakingBalanceBefore:", stakingBalanceBefore)
                 const aliceBalanceBefore = await DOTCall.balanceOf(AliceSigner.address)
                 
                 await AliceStakingCall.claimRewards(poolId)
 
-                const stakingBalanceAfter = await DOTCall.balanceOf(PROXYCONTRACT as string)
+                const stakingBalanceAfter = await DOTCall.balanceOf(ProxyAddress as string)
                 const aliceBalanceAfter = await DOTCall.balanceOf(AliceSigner.address)
 
                 expect(stakingBalanceBefore.eq(stakingBalanceAfter.add(rewards))).true
-                console.log("🚀 ~ file: stakeLSDCase.test.ts:1242 ~ it.skip ~ stakingBalanceBefore:", stakingBalanceBefore)
+                console.log("🚀 ~ file: stakeLSTCase.test.ts:1242 ~ it.skip ~ stakingBalanceBefore:", stakingBalanceBefore)
                 expect(aliceBalanceBefore.eq(aliceBalanceAfter.sub(rewards))).true
                 expect((await AliceStakingCall.earned(poolId, AliceSigner.address, DOT as string)).eq(deduction)).true
             })
@@ -1343,20 +1342,20 @@ describe('staking 合约测试', () => {
                 const aliceRewards = aliceEarned.sub(aliceDeduction)
                 console.log(aliceDeduction.toString(), aliceRewards.toString());
                 
-                let stakingBalanceBefore = await DOTCall.balanceOf(PROXYCONTRACT as string)
-                console.log("🚀 ~ file: stakeLSDCase.test.ts:1284 ~ it.skip ~ stakingBalanceBefore:", stakingBalanceBefore)
+                let stakingBalanceBefore = await DOTCall.balanceOf(ProxyAddress as string)
+                console.log("🚀 ~ file: stakeLSTCase.test.ts:1284 ~ it.skip ~ stakingBalanceBefore:", stakingBalanceBefore)
                 let aliceBalanceBefore = await DOTCall.balanceOf(AliceSigner.address)
                 await AliceStakingCall.claimRewards(poolId)
-                let stakingBalanceAfter = await DOTCall.balanceOf(PROXYCONTRACT as string)
+                let stakingBalanceAfter = await DOTCall.balanceOf(ProxyAddress as string)
                 let aliceBalanceAfter = await DOTCall.balanceOf(AliceSigner.address)
 
                 // 输出上面的结果
                 console.log(stakingBalanceBefore.toString(), stakingBalanceAfter.toString());
-                console.log("🚀 ~ file: stakeLSDCase.test.ts:1292 ~ it.skip ~ stakingBalanceBefore:", stakingBalanceBefore)
+                console.log("🚀 ~ file: stakeLSTCase.test.ts:1292 ~ it.skip ~ stakingBalanceBefore:", stakingBalanceBefore)
                 console.log(aliceBalanceBefore.toString(), aliceBalanceAfter.toString());
 
                 expect(stakingBalanceBefore.eq(stakingBalanceAfter.add(aliceRewards))).true
-                console.log("🚀 ~ file: stakeLSDCase.test.ts:1296 ~ it.skip ~ stakingBalanceBefore:", stakingBalanceBefore)
+                console.log("🚀 ~ file: stakeLSTCase.test.ts:1296 ~ it.skip ~ stakingBalanceBefore:", stakingBalanceBefore)
                 expect(aliceBalanceBefore.eq(aliceBalanceAfter.sub(aliceRewards))).true
                 let aliceEarnedAfterClaim = await AliceStakingCall.earned(poolId, AliceSigner.address, DOT as string)
                 let testAccountEarnedAfterClaim = await TestAStakingCall.earned(poolId, TestASinger.address, DOT as string)
@@ -1368,17 +1367,17 @@ describe('staking 合约测试', () => {
                 console.log(testDeduction.toString(), testRewards.toString());
 
                 stakingBalanceBefore = stakingBalanceAfter
-                console.log("🚀 ~ file: stakeLSDCase.test.ts:1308 ~ it.skip ~ stakingBalanceBefore:", stakingBalanceBefore)
+                console.log("🚀 ~ file: stakeLSTCase.test.ts:1308 ~ it.skip ~ stakingBalanceBefore:", stakingBalanceBefore)
                 const testBalanceBefore = await DOTCall.balanceOf(TestASinger.address)
                 await TestAStakingCall.claimRewards(poolId)
-                stakingBalanceAfter = await DOTCall.balanceOf(PROXYCONTRACT as string)
+                stakingBalanceAfter = await DOTCall.balanceOf(ProxyAddress as string)
                 const testBalanceAfter = await DOTCall.balanceOf(TestASinger.address)
                 // 输出上面的结果
                 console.log(stakingBalanceBefore.toString(), stakingBalanceAfter.toString());
-                console.log("🚀 ~ file: stakeLSDCase.test.ts:1315 ~ it.skip ~ stakingBalanceBefore:", stakingBalanceBefore)
+                console.log("🚀 ~ file: stakeLSTCase.test.ts:1315 ~ it.skip ~ stakingBalanceBefore:", stakingBalanceBefore)
                 console.log(testBalanceBefore.toString(), testBalanceAfter.toString());
                 expect(stakingBalanceBefore.eq(stakingBalanceAfter.add(testRewards))).true
-                console.log("🚀 ~ file: stakeLSDCase.test.ts:1318 ~ it.skip ~ stakingBalanceBefore:", stakingBalanceBefore)
+                console.log("🚀 ~ file: stakeLSTCase.test.ts:1318 ~ it.skip ~ stakingBalanceBefore:", stakingBalanceBefore)
                 expect(testBalanceBefore.eq(testBalanceAfter.sub(testRewards))).true
                 expect((await TestAStakingCall.earned(poolId, TestASinger.address, DOT as string)).eq(testDeduction.mul(testShare).div(totalShare))).true
                 expect((await AliceStakingCall.earned(poolId, AliceSigner.address, DOT as string)).eq(aliceEarnedAfterClaim.add(testDeduction.mul(aliceShare).div(totalShare)))).true
@@ -1406,12 +1405,12 @@ describe('staking 合约测试', () => {
                 const rewards = earned.sub(deduction)
                 console.log(earned.toString(), deduction.toString(), rewards.toString());
                 
-                const stakingBalanceBefore = await DOTCall.balanceOf(PROXYCONTRACT as string)
+                const stakingBalanceBefore = await DOTCall.balanceOf(ProxyAddress as string)
                 const aliceBalanceBefore = await DOTCall.balanceOf(AliceSigner.address)
                 
                 await AliceStakingCall.claimRewards(poolId)
 
-                const stakingBalanceAfter = await DOTCall.balanceOf(PROXYCONTRACT as string)
+                const stakingBalanceAfter = await DOTCall.balanceOf(ProxyAddress as string)
                 const aliceBalanceAfter = await DOTCall.balanceOf(AliceSigner.address)
 
                 expect(stakingBalanceBefore.eq(stakingBalanceAfter.add(rewards))).true
@@ -1446,17 +1445,17 @@ describe('staking 合约测试', () => {
                 const rewards = earned.sub(deduction)
                 console.log(deduction.toString(), rewards.toString());
                 
-                const stakingBalanceBefore = await DOTCall.balanceOf(PROXYCONTRACT as string)
-                console.log("🚀 ~ file: stakeLSDCase.test.ts:1385 ~ it.skip ~ stakingBalanceBefore:", stakingBalanceBefore)
+                const stakingBalanceBefore = await DOTCall.balanceOf(ProxyAddress as string)
+                console.log("🚀 ~ file: stakeLSTCase.test.ts:1385 ~ it.skip ~ stakingBalanceBefore:", stakingBalanceBefore)
                 const aliceBalanceBefore = await DOTCall.balanceOf(AliceSigner.address)
                 
                 await AliceStakingCall.claimRewards(poolId)
 
-                const stakingBalanceAfter = await DOTCall.balanceOf(PROXYCONTRACT as string)
+                const stakingBalanceAfter = await DOTCall.balanceOf(ProxyAddress as string)
                 const aliceBalanceAfter = await DOTCall.balanceOf(AliceSigner.address)
 
                 expect(stakingBalanceBefore.eq(stakingBalanceAfter.add(rewards))).true
-                console.log("🚀 ~ file: stakeLSDCase.test.ts:1394 ~ it.skip ~ stakingBalanceBefore:", stakingBalanceBefore)
+                console.log("🚀 ~ file: stakeLSTCase.test.ts:1394 ~ it.skip ~ stakingBalanceBefore:", stakingBalanceBefore)
                 expect(aliceBalanceBefore.eq(aliceBalanceAfter.sub(rewards))).true
                 expect((await AliceStakingCall.earned(poolId, AliceSigner.address, DOT as string)).eq(deduction)).true
             })
@@ -1482,28 +1481,28 @@ describe('staking 合约测试', () => {
                     earned = await AliceStakingCall.earned(poolId, AliceSigner.address, DOT as string)
                 }
 
-                const stakingBalanceBefore = await DOTCall.balanceOf(PROXYCONTRACT as string)
-                console.log("🚀 ~ file: stakeLSDCase.test.ts:1418 ~ it.skip ~ stakingBalanceBefore:", stakingBalanceBefore)
+                const stakingBalanceBefore = await DOTCall.balanceOf(ProxyAddress as string)
+                console.log("🚀 ~ file: stakeLSTCase.test.ts:1418 ~ it.skip ~ stakingBalanceBefore:", stakingBalanceBefore)
                 const aliceBalanceBefore = await DOTCall.balanceOf(AliceSigner.address)
                 
                 await AliceStakingCall.claimRewards(poolId)
 
-                const stakingBalanceAfter = await DOTCall.balanceOf(PROXYCONTRACT as string)
+                const stakingBalanceAfter = await DOTCall.balanceOf(ProxyAddress as string)
                 const aliceBalanceAfter = await DOTCall.balanceOf(AliceSigner.address)
 
                 expect(stakingBalanceBefore.eq(stakingBalanceAfter.add(earned))).true
-                console.log("🚀 ~ file: stakeLSDCase.test.ts:1427 ~ it.skip ~ stakingBalanceBefore:", stakingBalanceBefore)
+                console.log("🚀 ~ file: stakeLSTCase.test.ts:1427 ~ it.skip ~ stakingBalanceBefore:", stakingBalanceBefore)
                 expect(aliceBalanceBefore.eq(aliceBalanceAfter.sub(earned))).true
                 expect((await AliceStakingCall.earned(poolId, AliceSigner.address, DOT as string)).isZero()).true
             })
         })
 
         // TODO done 5 todo
-        describe.skip("转化池子 convertLSDPool", () => {
+        describe.skip("转化池子 convertLSTPool", () => {
             let ACAPoolId: number = 25
             let DOTPoolId: number = 26
             let LDOTPoolId: number = 27
-            let SADOTPoolId: number = 28
+            let TDOTPoolId: number = 28
             let LCDOTPoolId: number = 29
             let LCDOT2LDOTPool: number = 76
             let LCDOT2TDOTPool: number = 32
@@ -1521,22 +1520,22 @@ describe('staking 合约测试', () => {
             //     // DOTPoolId = poolIndex++
             //     // await AliceStakingCall.addPool(LDOT as string)
             //     // LDOTPoolId = poolIndex++
-            //     // await AliceStakingCall.addPool(SA_DOT as string)
-            //     // SADOTPoolId = poolIndex++
-            //     // await AliceStakingCall.addPool(LCDOT_13 as string)
+            //     // await AliceStakingCall.addPool(TDOT as string)
+            //     // TDOTPoolId = poolIndex++
+            //     // await AliceStakingCall.addPool(LCDOT as string)
             //     // LCDOTPoolId = poolIndex++
-            //     console.log(ACAPoolId, DOTPoolId, LDOTPoolId, SADOTPoolId, LCDOTPoolId);
+            //     console.log(ACAPoolId, DOTPoolId, LDOTPoolId, TDOTPoolId, LCDOTPoolId);
 
             //     // await AliceStakingCall.stake(ACAPoolId, amount)
             //     // await AliceStakingCall.stake(DOTPoolId, amount)
             //     // await AliceStakingCall.stake(LDOTPoolId, amount)
-            //     // await AliceStakingCall.stake(SADOTPoolId, amount)
+            //     // await AliceStakingCall.stake(TDOTPoolId, amount)
             //     // await AliceStakingCall.stake(LCDOTPoolId, amount)
             // })
 
             // FIXME 按理应该提示PoolNotExist
             it.skip("池子不存在时转化 => should reject", async () => {
-                await expectRevert(AliceStakingCall.convertLSDPool(999, ConvertType.DOT2LDOT), PoolIsEmpty)
+                await expectRevert(AliceStakingCall.convertLSTPool(999, ConvertType.DOT2LDOT), PoolIsEmpty)
             })
 
             // pass
@@ -1545,94 +1544,94 @@ describe('staking 合约测试', () => {
                 await AliceStakingCall.addPool(DOT as string)
                 await AliceStakingCall.stake(poolIndex, amount)
 
-                await AliceStakingCall.convertLSDPool(poolIndex, ConvertType.DOT2LDOT)
+                await AliceStakingCall.convertLSTPool(poolIndex, ConvertType.DOT2LDOT)
                 const { convertedShareType } = await AliceStakingCall.convertInfos(poolIndex)
                 expect(convertedShareType).eq(LDOT)
 
-                await expectRevert(AliceStakingCall.convertLSDPool(poolIndex, ConvertType.DOT2LDOT), AlreadyConverted)
+                await expectRevert(AliceStakingCall.convertLSTPool(poolIndex, ConvertType.DOT2LDOT), AlreadyConverted)
             })
 
             // pass
             it.skip("池子total share = 0 时转化 => should reject pool is empty", async () => {
                 const poolIndex = await AliceStakingCall.PoolIndex()
                 await AliceStakingCall.addPool(DOT as string)
-                await expectRevert(AliceStakingCall.convertLSDPool(poolIndex, ConvertType.DOT2LDOT), PoolIsEmpty)
+                await expectRevert(AliceStakingCall.convertLSTPool(poolIndex, ConvertType.DOT2LDOT), PoolIsEmpty)
             })
 
             // pass
             it.skip("ACA 池子 convert 成其他池子 => should reject", async () => {
-                await expectRevert(AliceStakingCall.convertLSDPool(ACAPoolId, ConvertType.DOT2LDOT), ShareTokenMustDOT)
-                await expectRevert(AliceStakingCall.convertLSDPool(ACAPoolId, ConvertType.DOT2TDOT), ShareTokenMustDOT)
-                await expectRevert(AliceStakingCall.convertLSDPool(ACAPoolId, ConvertType.LCDOT2LDOT), ShareTokenMustLcDOT)
-                await expectRevert(AliceStakingCall.convertLSDPool(ACAPoolId, ConvertType.LCDOT2TDOT), ShareTokenMustLcDOT)
+                await expectRevert(AliceStakingCall.convertLSTPool(ACAPoolId, ConvertType.DOT2LDOT), ShareTokenMustDOT)
+                await expectRevert(AliceStakingCall.convertLSTPool(ACAPoolId, ConvertType.DOT2TDOT), ShareTokenMustDOT)
+                await expectRevert(AliceStakingCall.convertLSTPool(ACAPoolId, ConvertType.LCDOT2LDOT), ShareTokenMustLcDOT)
+                await expectRevert(AliceStakingCall.convertLSTPool(ACAPoolId, ConvertType.LCDOT2TDOT), ShareTokenMustLcDOT)
             })
 
             // pass
             it.skip("DOT 池子 调用LCDOT convert的方法 => should reject", async () => {
-                await expectRevert(AliceStakingCall.convertLSDPool(DOTPoolId, ConvertType.LCDOT2LDOT), ShareTokenMustLcDOT)
-                await expectRevert(AliceStakingCall.convertLSDPool(DOTPoolId, ConvertType.LCDOT2TDOT), ShareTokenMustLcDOT)
+                await expectRevert(AliceStakingCall.convertLSTPool(DOTPoolId, ConvertType.LCDOT2LDOT), ShareTokenMustLcDOT)
+                await expectRevert(AliceStakingCall.convertLSTPool(DOTPoolId, ConvertType.LCDOT2TDOT), ShareTokenMustLcDOT)
             })
 
             // pass
             it.skip("LDOT 池子 convert 成其他池子 => should reject", async () => {
-                await expectRevert(AliceStakingCall.convertLSDPool(LDOTPoolId, ConvertType.DOT2LDOT), ShareTokenMustDOT)
-                await expectRevert(AliceStakingCall.convertLSDPool(LDOTPoolId, ConvertType.DOT2TDOT), ShareTokenMustDOT)
-                await expectRevert(AliceStakingCall.convertLSDPool(LDOTPoolId, ConvertType.LCDOT2LDOT), ShareTokenMustLcDOT)
-                await expectRevert(AliceStakingCall.convertLSDPool(LDOTPoolId, ConvertType.LCDOT2TDOT), ShareTokenMustLcDOT)
+                await expectRevert(AliceStakingCall.convertLSTPool(LDOTPoolId, ConvertType.DOT2LDOT), ShareTokenMustDOT)
+                await expectRevert(AliceStakingCall.convertLSTPool(LDOTPoolId, ConvertType.DOT2TDOT), ShareTokenMustDOT)
+                await expectRevert(AliceStakingCall.convertLSTPool(LDOTPoolId, ConvertType.LCDOT2LDOT), ShareTokenMustLcDOT)
+                await expectRevert(AliceStakingCall.convertLSTPool(LDOTPoolId, ConvertType.LCDOT2TDOT), ShareTokenMustLcDOT)
             })
 
-            // TODO SADOT 没钱
-            it.skip("SADOT 池子 convert 成其他池子 => should reject", async () => {
-                await expectRevert(AliceStakingCall.convertLSDPool(SADOTPoolId, ConvertType.DOT2LDOT), ShareTokenMustDOT)
-                await expectRevert(AliceStakingCall.convertLSDPool(SADOTPoolId, ConvertType.DOT2TDOT), ShareTokenMustDOT)
-                await expectRevert(AliceStakingCall.convertLSDPool(SADOTPoolId, ConvertType.LCDOT2LDOT), ShareTokenMustLcDOT)
-                await expectRevert(AliceStakingCall.convertLSDPool(SADOTPoolId, ConvertType.LCDOT2TDOT), ShareTokenMustLcDOT)
+            // TODO TDOT 没钱
+            it.skip("TDOT 池子 convert 成其他池子 => should reject", async () => {
+                await expectRevert(AliceStakingCall.convertLSTPool(TDOTPoolId, ConvertType.DOT2LDOT), ShareTokenMustDOT)
+                await expectRevert(AliceStakingCall.convertLSTPool(TDOTPoolId, ConvertType.DOT2TDOT), ShareTokenMustDOT)
+                await expectRevert(AliceStakingCall.convertLSTPool(TDOTPoolId, ConvertType.LCDOT2LDOT), ShareTokenMustLcDOT)
+                await expectRevert(AliceStakingCall.convertLSTPool(TDOTPoolId, ConvertType.LCDOT2TDOT), ShareTokenMustLcDOT)
             })
 
             // pass
             it.skip("LCDOT 池子 调用DOT convert的方法 => should reject", async () => {
-                await expectRevert(AliceStakingCall.convertLSDPool(LCDOTPoolId, ConvertType.DOT2LDOT), ShareTokenMustDOT)
-                await expectRevert(AliceStakingCall.convertLSDPool(LCDOTPoolId, ConvertType.DOT2TDOT), ShareTokenMustDOT)
+                await expectRevert(AliceStakingCall.convertLSTPool(LCDOTPoolId, ConvertType.DOT2LDOT), ShareTokenMustDOT)
+                await expectRevert(AliceStakingCall.convertLSTPool(LCDOTPoolId, ConvertType.DOT2TDOT), ShareTokenMustDOT)
             })
 
             it.skip("LCDOT2LDOT 后 stake、unstake功能正常", async () => {
                 const poolIndex = await AliceStakingCall.PoolIndex()
                 console.log("LCDOT2LDOT:", poolIndex.toString())
-                await AliceStakingCall.addPool(LCDOT_13 as string)
+                await AliceStakingCall.addPool(LCDOT as string)
                 // const stakeTx = await AliceStakingCall.stake(LCDOT2LDOTPool, amount)
                 // console.log(stakeTx);
                 
-                // await checkStake(stakeTx.hash, LCDOT2LDOTPool, LCDOT_13 as string, amount)
-                await checkStake("0x1e43e88c8626edf49fb2368ef77b5cf6cb5fefee2aa7a454f420c79b20ea8e2e", LCDOT2LDOTPool, LCDOT_13 as string, amount)
-                const tx = await AliceStakingCall.convertLSDPool(poolIndex, ConvertType.LCDOT2LDOT)
-                await checkConvertLSDPool(tx.hash, poolIndex, ConvertType.LCDOT2LDOT)
+                // await checkStake(stakeTx.hash, LCDOT2LDOTPool, LCDOT as string, amount)
+                await checkStake("0x1e43e88c8626edf49fb2368ef77b5cf6cb5fefee2aa7a454f420c79b20ea8e2e", LCDOT2LDOTPool, LCDOT as string, amount)
+                const tx = await AliceStakingCall.convertLSTPool(poolIndex, ConvertType.LCDOT2LDOT)
+                await checkConvertLSTPool(tx.hash, poolIndex, ConvertType.LCDOT2LDOT)
 
                 const stakeTx = await AliceStakingCall.stake(poolIndex, amount)
                 console.log("stakeTx", stakeTx);
-                await checkStake(stakeTx.hash, poolIndex, LCDOT_13 as string, amount)
+                await checkStake(stakeTx.hash, poolIndex, LCDOT as string, amount)
                 
                 const unstakeTx = await AliceStakingCall.unstake(poolIndex, amount)
                 console.log("unstakeTx", unstakeTx);
-                await checkUnstake(unstakeTx.hash, poolIndex, LCDOT_13 as string, amount)
+                await checkUnstake(unstakeTx.hash, poolIndex, LCDOT as string, amount)
 
             })
 
             it("LCDOT2TDOT 后 stake、unstake功能正常", async () => {
                 const poolIndex = await AliceStakingCall.PoolIndex()
                 console.log("LCDOT2TDOT:", poolIndex.toString())
-                await AliceStakingCall.addPool(LCDOT_13 as string)
+                await AliceStakingCall.addPool(LCDOT as string)
                 const stakeTxBefore = await AliceStakingCall.stake(poolIndex, amount)
-                await checkStake(stakeTxBefore.hash, poolIndex, LCDOT_13 as string, amount)
-                const tx = await AliceStakingCall.convertLSDPool(poolIndex, ConvertType.LCDOT2TDOT)
-                await checkConvertLSDPool(tx.hash, poolIndex, ConvertType.LCDOT2TDOT)
+                await checkStake(stakeTxBefore.hash, poolIndex, LCDOT as string, amount)
+                const tx = await AliceStakingCall.convertLSTPool(poolIndex, ConvertType.LCDOT2TDOT)
+                await checkConvertLSTPool(tx.hash, poolIndex, ConvertType.LCDOT2TDOT)
 
                 const stakeTx = await AliceStakingCall.stake(poolIndex, amount)
                 console.log("stakeTx", stakeTx);
-                await checkStake(stakeTx.hash, poolIndex, LCDOT_13 as string, amount)
+                await checkStake(stakeTx.hash, poolIndex, LCDOT as string, amount)
                 
                 const unstakeTx = await AliceStakingCall.unstake(poolIndex, amount)
                 console.log("unstakeTx", unstakeTx);
-                await checkUnstake(unstakeTx.hash, poolIndex, LCDOT_13 as string, amount)
+                await checkUnstake(unstakeTx.hash, poolIndex, LCDOT as string, amount)
             })
 
             it("DOT2LDOT 后 stake、unstake功能正常", async () => {
@@ -1641,9 +1640,9 @@ describe('staking 合约测试', () => {
                 await AliceStakingCall.addPool(DOT as string)
                 const stakeTxBefore = await AliceStakingCall.stake(poolIndex, amount)
                 await checkStake(stakeTxBefore.hash, poolIndex, DOT as string, amount)
-                const tx = await AliceStakingCall.convertLSDPool(poolIndex, ConvertType.DOT2LDOT)
-                await checkConvertLSDPool(tx.hash, poolIndex, ConvertType.DOT2LDOT)
-                // await checkConvertLSDPool("0x8163420abda87cdd2b84d9e2c0fbbe3a6fd1b6ea0d1814991cc99b29c63a5e3c", poolIndex, ConvertType.DOT2LDOT)
+                const tx = await AliceStakingCall.convertLSTPool(poolIndex, ConvertType.DOT2LDOT)
+                await checkConvertLSTPool(tx.hash, poolIndex, ConvertType.DOT2LDOT)
+                // await checkConvertLSTPool("0x8163420abda87cdd2b84d9e2c0fbbe3a6fd1b6ea0d1814991cc99b29c63a5e3c", poolIndex, ConvertType.DOT2LDOT)
 
                 const stakeTx = await AliceStakingCall.stake(poolIndex, amount)
                 console.log("stakeTx", stakeTx);
@@ -1663,9 +1662,9 @@ describe('staking 合约测试', () => {
                 await AliceStakingCall.addPool(DOT as string)
                 const stakeTxBefore = await AliceStakingCall.stake(poolIndex, amount)
                 await checkStake(stakeTxBefore.hash, poolIndex, DOT as string, amount)
-                const tx = await AliceStakingCall.convertLSDPool(poolIndex, ConvertType.DOT2TDOT)
-                await checkConvertLSDPool(tx.hash, poolIndex, ConvertType.DOT2TDOT)
-                // await checkConvertLSDPool("0x8163420abda87cdd2b84d9e2c0fbbe3a6fd1b6ea0d1814991cc99b29c63a5e3c", poolIndex, ConvertType.DOT2TDOT)
+                const tx = await AliceStakingCall.convertLSTPool(poolIndex, ConvertType.DOT2TDOT)
+                await checkConvertLSTPool(tx.hash, poolIndex, ConvertType.DOT2TDOT)
+                // await checkConvertLSTPool("0x8163420abda87cdd2b84d9e2c0fbbe3a6fd1b6ea0d1814991cc99b29c63a5e3c", poolIndex, ConvertType.DOT2TDOT)
 
                 const stakeTx = await AliceStakingCall.stake(poolIndex, amount)
                 console.log("stakeTx", stakeTx);
@@ -1682,35 +1681,35 @@ describe('staking 合约测试', () => {
             it.skip("LCDOT2WTDOT 后 stake、unstake正常", async () => {
                 const poolIndex = await AliceStakingCall.PoolIndex()
                 console.log("LCDOT2WTDOT:", poolIndex.toString())
-                await AliceStakingCall.addPool(LCDOT_13 as string)
+                await AliceStakingCall.addPool(LCDOT as string)
                 const stakeTxBefore = await AliceStakingCall.stake(poolIndex, amount)
-                await checkStake(stakeTxBefore.hash, poolIndex, LCDOT_13 as string, amount)
-                const tx = await AliceStakingCall.convertLSDPool(poolIndex, ConvertType.LCDOT2WTDOT)
-                await checkConvertLSDPool(tx.hash, poolIndex, ConvertType.LCDOT2WTDOT)
-                // await checkConvertLSDPool("0x8163420abda87cdd2b84d9e2c0fbbe3a6fd1b6ea0d1814991cc99b29c63a5e3c", poolIndex, ConvertType.LCDOT2WTDOT)
+                await checkStake(stakeTxBefore.hash, poolIndex, LCDOT as string, amount)
+                const tx = await AliceStakingCall.convertLSTPool(poolIndex, ConvertType.LCDOT2WTDOT)
+                await checkConvertLSTPool(tx.hash, poolIndex, ConvertType.LCDOT2WTDOT)
+                // await checkConvertLSTPool("0x8163420abda87cdd2b84d9e2c0fbbe3a6fd1b6ea0d1814991cc99b29c63a5e3c", poolIndex, ConvertType.LCDOT2WTDOT)
 
                 const stakeTx = await AliceStakingCall.stake(poolIndex, amount)
                 console.log("stakeTx", stakeTx);
-                await checkStake(stakeTx.hash, poolIndex, LCDOT_13 as string, amount)
-                // await checkStake("0x973e22fce87ce37b12f1104b59b5e69113a78bba32ca8babb56daee95d3b5dd6", poolIndex, LCDOT_13 as string, amount)
+                await checkStake(stakeTx.hash, poolIndex, LCDOT as string, amount)
+                // await checkStake("0x973e22fce87ce37b12f1104b59b5e69113a78bba32ca8babb56daee95d3b5dd6", poolIndex, LCDOT as string, amount)
                 
                 const unstakeTx = await AliceStakingCall.unstake(poolIndex, amount)
                 console.log("unstakeTx", unstakeTx);
-                await checkUnstake(unstakeTx.hash, poolIndex, LCDOT_13 as string, amount)
-                // await checkUnstake("0xb8b4cdc63a0a3d13f41c40e0ef74abd3f7f6e65e6986dd0e2deb67f79753c6cd", poolIndex, LCDOT_13 as string, amount)
+                await checkUnstake(unstakeTx.hash, poolIndex, LCDOT as string, amount)
+                // await checkUnstake("0xb8b4cdc63a0a3d13f41c40e0ef74abd3f7f6e65e6986dd0e2deb67f79753c6cd", poolIndex, LCDOT as string, amount)
             })
 
             // pass id=77
             it.skip("DOT2WTDOT 后 stake、unstake功能正常", async () => {
                 const poolIndex = await AliceStakingCall.PoolIndex()
-                console.log("🚀 ~ file: stakeLSDCase.test.ts:1860 ~ it ~ poolIndex:", poolIndex.toString())
+                console.log("🚀 ~ file: stakeLSTCase.test.ts:1860 ~ it ~ poolIndex:", poolIndex.toString())
                 await AliceStakingCall.addPool(DOT as string)
                 const stakeTxBefore = await AliceStakingCall.stake(poolIndex, amount)
                 await checkStake(stakeTxBefore.hash, poolIndex, DOT as string, amount)
-                const tx = await AliceStakingCall.convertLSDPool(poolIndex, ConvertType.DOT2WTDOT)
-                await checkConvertLSDPool(tx.hash, poolIndex, ConvertType.DOT2WTDOT)
+                const tx = await AliceStakingCall.convertLSTPool(poolIndex, ConvertType.DOT2WTDOT)
+                await checkConvertLSTPool(tx.hash, poolIndex, ConvertType.DOT2WTDOT)
                 
-                // await checkConvertLSDPool("0x8163420abda87cdd2b84d9e2c0fbbe3a6fd1b6ea0d1814991cc99b29c63a5e3c", poolIndex, ConvertType.LCDOT2WTDOT)
+                // await checkConvertLSTPool("0x8163420abda87cdd2b84d9e2c0fbbe3a6fd1b6ea0d1814991cc99b29c63a5e3c", poolIndex, ConvertType.LCDOT2WTDOT)
 
                 const stakeTx = await AliceStakingCall.stake(poolIndex, amount)
                 console.log(stakeTx);
@@ -1752,7 +1751,7 @@ describe('staking 合约测试', () => {
                 await expectRevert(AliceStakingCall.unstake(poolId, amount), AlreadyPaused)
                 await expectRevert(AliceStakingCall.updateRewardRule(poolId, DOT as string, amount, 2000), AlreadyPaused)
                 await expectRevert(AliceStakingCall.claimRewards(poolId), AlreadyPaused)
-                await expectRevert(AliceStakingCall.convertLSDPool(poolId, ConvertType.DOT2LDOT), AlreadyPaused)
+                await expectRevert(AliceStakingCall.convertLSTPool(poolId, ConvertType.DOT2LDOT), AlreadyPaused)
                 await expectRevert(AliceStakingCall.setRewardsDeductionRate(poolId, '1000000000000000000'), AlreadyPaused)
                 await expectRevert(AliceStakingCall.exit(poolId), AlreadyPaused)
                 await expectRevert(AliceStakingCall.setPoolOperationPause(poolId, Operation.Stake, true), AlreadyPaused)

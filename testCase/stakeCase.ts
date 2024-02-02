@@ -1,7 +1,8 @@
 import { IStakingCall } from '../call/IStakingCall'
 import { Keyring } from '@polkadot/api';
 import { Suite } from "../suite";
-import { ACCOUNT, PROXYCONTRACT, ACA, DOT, LDOT, SA_DOT, LCDOT_13, HOMA, STABLE_ASSET, ALICE, LIQUID_CROWDLOAN } from "../utils/config";
+import { ACCOUNT, ProxyAddress, HOMA, STABLE_ASSET, LIQUID_CROWDLOAN } from "../utils/config";
+import { ASSET_ADDRESS } from '../utils/config';
 import { AcalaJsonRpcProvider } from '@acala-network/eth-providers';
 
 (async () => {
@@ -33,18 +34,18 @@ import { AcalaJsonRpcProvider } from '@acala-network/eth-providers';
 
     async function callStake(poolId: number, amount: string, account: any) {
         const callData = iStakingCall.stakeEncode(poolId, amount)
-        await suite.send(account, callEVM(PROXYCONTRACT as any, callData))
+        await suite.send(account, callEVM(ProxyAddress as any, callData))
 
     }
 
     async function callAddPool(token: string, account: any) {
         const callData = iStakingCall.addPoolEncode(token)
-        await suite.send(account, callEVM(PROXYCONTRACT as any, callData))
+        await suite.send(account, callEVM(ProxyAddress as any, callData))
     }
 
     console.log(await iStakingCall.owner())
     const amount = '1000000000000'
-    await callApprove(LCDOT_13 as any, amount, testAccount)
+    await callApprove(ASSET_ADDRESS.LCDOT as any, amount, testAccount)
     console.log('=== approve completed ===')
     // // await callAddPool(DOT)
     // await callStake(0, amount, testAccount)

@@ -19,10 +19,10 @@ const homaABI = [
 const homaIface = new ethers.utils.Interface(homaABI);
 
 export class IHomaCall {
-    homaContract: ethers.Contract
+    contract: ethers.Contract
     constructor(provider: ethers.providers.JsonRpcProvider | ethers.Wallet) {
-        this.homaContract = new ethers.Contract(
-            HOMA as string,
+        this.contract = new ethers.Contract(
+            HOMA,
             homaABI,
             provider
         );
@@ -34,7 +34,7 @@ export class IHomaCall {
      * @returns BigNumber
      */
     async getCommissionRate(blockTag: BlockNumber = "latest") {
-        return await this.homaContract.getCommissionRate({ blockTag })
+        return await this.contract.getCommissionRate({ blockTag })
     }
 
     /**
@@ -43,7 +43,7 @@ export class IHomaCall {
      * @returns BigNumber
      */
     async getEstimatedRewardRate(blockTag: BlockNumber = "latest") {
-        return await this.homaContract.getEstimatedRewardRate({ blockTag })
+        return await this.contract.getEstimatedRewardRate({ blockTag })
     }
 
     /**
@@ -52,7 +52,7 @@ export class IHomaCall {
      * @returns BigNumber
      */
     async getExchangeRate(blockTag: BlockNumber = "latest") {
-        return await this.homaContract.getExchangeRate({ blockTag })
+        return await this.contract.getExchangeRate({ blockTag })
     }
 
     /**
@@ -61,17 +61,17 @@ export class IHomaCall {
      * @returns BigNumber
      */
     async getFastMatchFee(blockTag: BlockNumber = "latest") {
-        return await this.homaContract.getFastMatchFee({ blockTag })
+        return await this.contract.getFastMatchFee({ blockTag })
     }
 
     async mint(mintAmount: Amount) {
-        const tx = await this.homaContract.mint(mintAmount)
+        const tx = await this.contract.mint(mintAmount)
         await tx.wait()
         return tx
     }
 
     async requestRedeem(redeemAmount: Amount, fastMatch: Boolean) {
-        const tx = await this.homaContract.requestRedeem(redeemAmount, fastMatch)
+        const tx = await this.contract.requestRedeem(redeemAmount, fastMatch)
         await tx.wait()
         return tx
     }

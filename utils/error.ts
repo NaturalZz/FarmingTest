@@ -1,9 +1,11 @@
 export const notOwner = "Ownable: caller is not the owner"
+export const ExistentialDeposit = "Multicurrency Transfer failed: ExistentialDeposit"
 // stake
 export const PoolNotExist = "invalid pool"
 export const CannotStake0 = "cannot stake 0"
 export const InsufficientAllowance = "insufficient allowance"
 export const BalanceLow = "Multicurrency Transfer failed: BalanceTooLow"
+export const TransferAmountExceeds = "transfer amount exceeds allowance" // execution reverted: ERC20: transfer amount exceeds allowance
 // unstake
 export const CannotUnstakeZero = "cannot unstake 0"
 export const ShareNotEnough = "share not enough"
@@ -30,3 +32,15 @@ export const NotPaused = "execution reverted: Pausable: not paused"
 export const InvalidWTDOT = "WTDOT: invalid WTDOT amount"
 export const InvalidTDOT = "WTDOT: invalid TDOT amount"
 export const WTDOTNotEnough = "WTDOT: WTDOT not enough"
+// wrappedTUSDCase
+export const InvalidWTUSD = "WTUSD: invalid WTUSD amount"
+export const InvalidTUSD = "WTUSD: invalid TUSD amount"
+export const WTUSDNotEnough = "WTUSD: WTUSD not enough"
+// StableAssetStakeUtil
+export const InvalidStableAssetPool = "invalid stable asset pool"
+export const StableAssetMintFailed = "stable-asset mint failed"
+export const ZeroMinted = "zero minted share amount is not allowed"
+export const ZeroWrapped = "zero wrapped share amount is not allowed"
+export const ZeroShare = "zero share amount is not allowed"
+// Convertor
+export const InvalidAmount= "invalid input amount"

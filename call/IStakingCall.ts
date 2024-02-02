@@ -1,55 +1,60 @@
 import { ethers } from "ethers";
 import { AcalaJsonRpcProvider } from '@acala-network/eth-providers';
-import UpgradeableStakingLSDABI from '../UpgradeableStakingLSD.json'
-import { BLACK_HOLE, LIQUID_CROWDLOAN, PROXYCONTRACT } from "../utils/config";
+import UpgradeableStakingLSTABI from '../contracts/UpgradeableStakingLST.json'
+import { ProxyAddress } from "../utils/config";
 import { Operation, UserAddress, ContractAddress, Amount, BlockNumber, ConvertType } from "../utils/type";
 import { erc20ABI } from "./IERC20Call";
+import { getEvents, parseEvents } from "../utils/ethHelper";
+import { getTokenInfo, getTokenName, ASSET } from "../utils/assets";
+import BigNumber from "bignumber.js";
+import { formatDecimal } from "../utils/decimal";
 
-const stakingIface = new ethers.utils.Interface(UpgradeableStakingLSDABI);
+const stakingIface = new ethers.utils.Interface(UpgradeableStakingLSTABI);
 
 export class IStakingCall {
-    proxyContract: ethers.Contract
+    contract: ethers.Contract
+    iface = stakingIface
     constructor(provider: ethers.providers.JsonRpcProvider | ethers.Wallet | AcalaJsonRpcProvider) {
-        this.proxyContract = new ethers.Contract(
-            PROXYCONTRACT as string,
-            UpgradeableStakingLSDABI,
+        this.contract = new ethers.Contract(
+            ProxyAddress,
+            UpgradeableStakingLSTABI,
             provider
         );
     }
     async DOT() {
-        return await this.proxyContract.DOT();
+        return await this.contract.DOT();
     }
 
     async HOMA() {
-        return await this.proxyContract.HOMA();
+        return await this.contract.HOMA();
     }
 
     async LCDOT() {
-        return await this.proxyContract.LCDOT();
+        return await this.contract.LCDOT();
     }
 
     async LDOT() {
-        return await this.proxyContract.LDOT();
+        return await this.contract.LDOT();
     }
 
     async WTDOT() {
-        return await this.proxyContract.WTDOT()
+        return await this.contract.WTDOT()
     }
 
     async LIQUID_CROWDLOAN() {
-        return await this.proxyContract.LIQUID_CROWDLOAN();
+        return await this.contract.LIQUID_CROWDLOAN();
     }
 
     async MAX_REWARD_TYPES() {
-        return await this.proxyContract.MAX_REWARD_TYPES();
+        return await this.contract.MAX_REWARD_TYPES();
     }
 
     async STABLE_ASSET() {
-        return await this.proxyContract.STABLE_ASSET();
+        return await this.contract.STABLE_ASSET();
     }
 
     async TDOT() {
-        return await this.proxyContract.TDOT();
+        return await this.contract.TDOT();
     }
 
     /**
@@ -57,7 +62,7 @@ export class IStakingCall {
      * @returns BigNumber
      */
     async PoolIndex(blockTag: BlockNumber = "latest") {
-        return await this.proxyContract.poolIndex({ blockTag });
+        return await this.contract.poolIndex({ blockTag });
     }
 
     /**
@@ -67,7 +72,7 @@ export class IStakingCall {
      * @returns BigNumber
      */
     async shares(poolId: number, who: UserAddress, blockTag: BlockNumber = "latest") {
-        return await this.proxyContract.shares(poolId, who, { blockTag });
+        return await this.contract.shares(poolId, who, { blockTag });
     }
 
     /**
@@ -76,7 +81,7 @@ export class IStakingCall {
      * @returns BigNumber
      */
     async totalShares(poolId: number, blockTag: BlockNumber = "latest") {
-        return await this.proxyContract.totalShares(poolId, { blockTag });
+        return await this.contract.totalShares(poolId, { blockTag });
     }
 
     /**
@@ -86,7 +91,7 @@ export class IStakingCall {
      * @returns 
      */
     async shareTypes(poolId: number, blockTag: BlockNumber = "latest") {
-        return await this.proxyContract.shareTypes(poolId, { blockTag });
+        return await this.contract.shareTypes(poolId, { blockTag });
     }
 
     /**
@@ -97,7 +102,7 @@ export class IStakingCall {
      * @returns BigNumber
      */
     async earned(poolId: number, who: UserAddress, rewardType: ContractAddress, blockTag: BlockNumber = "latest") {
-        return await this.proxyContract.earned(poolId, who, rewardType, { blockTag });
+        return await this.contract.earned(poolId, who, rewardType, { blockTag });
     }
 
     /**
@@ -108,7 +113,7 @@ export class IStakingCall {
      * @returns 
      */
     async rewards(poolId: number, who: UserAddress, rewardType: ContractAddress, blockTag: BlockNumber = "latest") {
-        return await this.proxyContract.rewards(poolId, who, rewardType, { blockTag });
+        return await this.contract.rewards(poolId, who, rewardType, { blockTag });
     }
 
     /**
@@ -117,7 +122,7 @@ export class IStakingCall {
      * @returns BigNumber
      */
     async rewardsDeductionRates(poolId: number, blockTag: BlockNumber = "latest") {
-        return await this.proxyContract.rewardsDeductionRates(poolId, { blockTag });
+        return await this.contract.rewardsDeductionRates(poolId, { blockTag });
     }
 
     /**
@@ -125,7 +130,7 @@ export class IStakingCall {
      * @returns 用户地址
      */
     async owner(blockTag: BlockNumber = "latest") {
-        return await this.proxyContract.owner({ blockTag });
+        return await this.contract.owner({ blockTag });
     }
 
     /**
@@ -133,11 +138,11 @@ export class IStakingCall {
      * @returns Boolean
      */
     async paused(blockTag: BlockNumber = "latest") {
-        return await this.proxyContract.paused({ blockTag });
+        return await this.contract.paused({ blockTag });
     }
 
     async rewardPerShare(poolId: number, rewardType: ContractAddress, blockTag: BlockNumber = "latest") {
-        return await this.proxyContract.rewardPerShare(poolId, rewardType, { blockTag });
+        return await this.contract.rewardPerShare(poolId, rewardType, { blockTag });
     }
 
     /**
@@ -150,7 +155,7 @@ export class IStakingCall {
      * rewardRateAccumulated, lastAccumulatedTime}
      */
     async rewardRules(poolId: number, rewardType: ContractAddress, blockTag: BlockNumber = "latest") {
-        return await this.proxyContract.rewardRules(poolId, rewardType, { blockTag });
+        return await this.contract.rewardRules(poolId, rewardType, { blockTag });
     }
 
     /**
@@ -159,11 +164,11 @@ export class IStakingCall {
      * @returns 币种地址Array[address]
      */
     async rewardTypes(poolId: number, blockTag: BlockNumber = "latest") {
-        return await this.proxyContract.rewardTypes(poolId, { blockTag });
+        return await this.contract.rewardTypes(poolId, { blockTag });
     }
 
     async lastTimeRewardApplicable(poolId: number, rewardType: ContractAddress, blockTag: BlockNumber = "latest") {
-        return await this.proxyContract.lastTimeRewardApplicable(poolId, rewardType, { blockTag });
+        return await this.contract.lastTimeRewardApplicable(poolId, rewardType, { blockTag });
     }
 
     /**
@@ -172,7 +177,7 @@ export class IStakingCall {
      * @returns ConvertInfo {convertedShareType: address 币种地址, convertedExchangeRate: BigNumber}
      */
     async convertInfos(poolId: number, blockTag: BlockNumber = "latest") {
-        return await this.proxyContract.convertInfos(poolId, { blockTag });
+        return await this.contract.convertInfos(poolId, { blockTag });
     }
 
     /**
@@ -183,7 +188,7 @@ export class IStakingCall {
      * @returns 
      */
     async paidAccumulatedRates(poolId: number, who: UserAddress, rewardType: ContractAddress, blockTag: BlockNumber = "latest") {
-        return await this.proxyContract.paidAccumulatedRates(poolId, who, rewardType, { blockTag });
+        return await this.contract.paidAccumulatedRates(poolId, who, rewardType, { blockTag });
     }
     /**
      * 获取池子某个功能是否被禁用
@@ -192,7 +197,7 @@ export class IStakingCall {
      * @returns {Boolean}
      */
     async pausedPoolOperations(poolId: number, operation: Operation, blockTag: BlockNumber = "latest") {
-        return await this.proxyContract.pausedPoolOperations(poolId, operation, { blockTag });
+        return await this.contract.pausedPoolOperations(poolId, operation, { blockTag });
     }
 
     // --------------交易--------------
@@ -218,7 +223,7 @@ export class IStakingCall {
     }
 
     async addPool(tokenAddress: ContractAddress) {
-        const tx = await this.proxyContract.addPool(tokenAddress)
+        const tx = await this.contract.addPool(tokenAddress)
         await tx.wait()
 
         return tx
@@ -232,11 +237,11 @@ export class IStakingCall {
     approveEncode(amount: Amount) {
         // erc20 授权 proxy 合约
         const erc20Iface = new ethers.utils.Interface(erc20ABI);
-        return erc20Iface.encodeFunctionData("approve", [PROXYCONTRACT, amount]);
+        return erc20Iface.encodeFunctionData("approve", [ProxyAddress, amount]);
     }
 
     async stake(poolId: number, amount: Amount) {
-        const tx = await this.proxyContract.stake(poolId, amount)
+        const tx = await this.contract.stake(poolId, amount)
         await tx.wait()
 
         return tx
@@ -246,8 +251,50 @@ export class IStakingCall {
         return stakingIface.encodeFunctionData("stake", [poolId, amount]);
     }
 
+    async getStakes(startBlock: BlockNumber, endBlock: BlockNumber, filterPool?: number[]) {
+        const filters = this.contract.filters.Stake()
+        const events = await getEvents(filters, startBlock, endBlock)
+        const result: any[] = []
+        events.forEach((log: any) => {
+            const parsed = this.iface.parseLog({
+                data: log.data,
+                topics: log.topics.filter((x: any) => x) as string[],
+            });
+            const [sender, poolId, amount] = parsed.args;
+            if (!filterPool || filterPool.indexOf(poolId.toNumber()) != -1) {
+                result.push({
+                    ...log,
+                    sender: sender as string,
+                    poolId: poolId.toString() as string,
+                    amount: amount.toString() as string,
+                })
+            }
+        })
+        return result
+    }
+
+    async getAccounts(startBlock: BlockNumber, endBlock: BlockNumber, filterPool: number[]) {
+        const stakes = await this.getStakes(startBlock, endBlock, filterPool)
+        const accounts: string[] = []
+
+        stakes.forEach((stake: any) => {
+            if (accounts.indexOf(stake.sender) == -1) {
+                accounts.push(stake.sender)
+            }
+        });
+
+        return accounts
+    }
+
+    async exit(poolId: number) {
+        const tx = await this.contract.exit(poolId)
+        await tx.wait()
+
+        return tx
+    }
+
     async unstake(poolId: number, amount: Amount) {
-        const tx = await this.proxyContract.unstake(poolId, amount)
+        const tx = await this.contract.unstake(poolId, amount)
         await tx.wait()
 
         return tx
@@ -257,19 +304,19 @@ export class IStakingCall {
         return stakingIface.encodeFunctionData("unstake", [poolId, amount]);
     }
 
-    async convertLSDPool(poolId: number, convertType: ConvertType) {
-        const tx = await this.proxyContract.convertLSDPool(poolId, convertType)
+    async convertLSTPool(poolId: number, convertType: ConvertType) {
+        const tx = await this.contract.convertLSTPool(poolId, convertType)
         await tx.wait()
 
         return tx
     }
 
-    convertLSDPoolEncode(poolId: number, convertType: ConvertType) {
-        return stakingIface.encodeFunctionData("convertLSDPool", [poolId, convertType]);
+    convertLSTPoolEncode(poolId: number, convertType: ConvertType) {
+        return stakingIface.encodeFunctionData("convertLSTPool", [poolId, convertType]);
     }
 
     async claimRewards(poolId: number) {
-        const tx = await this.proxyContract.claimRewards(poolId)
+        const tx = await this.contract.claimRewards(poolId)
         await tx.wait()
 
         return tx
@@ -284,11 +331,62 @@ export class IStakingCall {
         return stakingIface.encodeFunctionData("claimRewards", [poolId]);
     }
 
-    async exit(poolId: number) {
-        const tx = await this.proxyContract.exit(poolId)
-        await tx.wait()
+    async getClaimRewards(startBlock: BlockNumber, endBlock: BlockNumber, filterPools: number[]) {
+        const filters = this.contract.filters.ClaimReward()
+        const events = await getEvents(filters, startBlock, endBlock)
+        const result: any[] = []
+        events.forEach((log: any) => {
+            const parsed = this.iface.parseLog({
+                data: log.data,
+                topics: log.topics.filter((x: any) => x) as string[],
+            });
+            const [sender, poolId, rewardType, amount] = parsed.args;
 
-        return tx
+            if (filterPools.indexOf(poolId.toNumber()) != -1) {
+                result.push({
+                    ...log,
+                    sender: sender as string,
+                    rewardType: getTokenInfo(rewardType)?.symbol as string,
+                    poolId: poolId.toString() as string,
+                    amount: amount.toBigInt() as bigint,
+                })
+            }
+        })
+        return result
+    }
+
+    async getTotalRewardPaid(startBlock: BlockNumber, endBlock: BlockNumber, prices: any, filterPools: number[]) {
+        const accounts = await this.getAccounts(startBlock, endBlock, filterPools)
+        const claimedRewards = await this.getClaimRewards(startBlock, endBlock, filterPools)
+        console.log(accounts.length, claimedRewards.length);
+        console.log(accounts);
+        
+        console.log(claimedRewards);
+        
+        let earned = new BigNumber(0)
+
+        for (let poolId of filterPools) {
+            const rewardTypes = await this.rewardTypes(poolId, endBlock)
+            for (const rewardType of rewardTypes) {
+                const token = getTokenInfo(rewardType) as ASSET
+                const price = prices[token?.symbol]
+                
+                for(let account of accounts) {
+                    const accountEarned = formatDecimal(await this.earned(poolId, account, rewardType, endBlock), -token.decimals)
+                    const accountEarnedPrice = new BigNumber(accountEarned).times(price)
+                    earned = earned.plus(accountEarnedPrice)
+                }
+            }
+        }
+        let claimed = new BigNumber(0)
+        for (let rewards of claimedRewards) {
+            const token = getTokenInfo(rewards.rewardType) as ASSET
+            const price = prices[rewards?.rewardType]
+            const rewardClaimed = formatDecimal(rewards.amount, -token.decimals)
+            claimed = claimed.plus(new BigNumber(rewardClaimed).times(price))
+        }
+        
+        return { claimed: claimed.toString(), earned: earned.toString(), totalRewardPaid: claimed.plus(earned).toString() }
     }
 
     /**
@@ -306,7 +404,7 @@ export class IStakingCall {
         rewardRate: Amount,
         endTime: number|string
     ) {
-        const tx = await this.proxyContract.updateRewardRule(
+        const tx = await this.contract.updateRewardRule(
             poolId,
             rewardType,
             rewardRate,
@@ -340,8 +438,42 @@ export class IStakingCall {
         ]);
     }
 
+    async filterRewardRule(startBlock: BlockNumber, endBlock: BlockNumber, nowTime: number, filterPool: number[]) {
+        const filters = this.contract.filters.RewardRuleUpdate()
+        const events = await getEvents(filters, startBlock, endBlock)
+        const classRule = filterPool.reduce((obj, item) => {
+            obj[item] = []
+            return obj
+        }, {} as {[key: number]: any[]})
+
+        events.forEach((log: any) => {
+            const parsed = this.iface.parseLog({
+                data: log.data,
+                topics: log.topics.filter((x: any) => x) as string[],
+            });
+
+            const [poolId, rewardType, rewardRate, endTime] = parsed.args;
+            const rewardTokenName = getTokenName(rewardType)
+            if(filterPool.indexOf(poolId.toNumber()) != -1) {
+                // let rewardTime = endTime.sub(log.timeStamp).toString()
+                // if (endTime.gt(nowTime)) {
+                //     rewardTime = nowTime - log.timeStamp
+                // }
+                classRule[poolId].push({
+                    ...log,
+                    poolId: poolId.toNumber(),
+                    rewardType: rewardTokenName,
+                    rewardRate: rewardRate.toString(),
+                    endTime: endTime.toString(),
+                })
+            }
+        })
+        
+        return classRule
+    }
+
     async pause() {
-        const tx = await this.proxyContract.pause()
+        const tx = await this.contract.pause()
         await tx.wait()
 
         return tx
@@ -356,7 +488,7 @@ export class IStakingCall {
     }
 
     async unpause() {
-        const tx = await this.proxyContract.unpause()
+        const tx = await this.contract.unpause()
         await tx.wait()
 
         return tx
@@ -371,7 +503,7 @@ export class IStakingCall {
     }
 
     async setPoolOperationPause(poolId: number, operation: Operation, paused: Boolean) {
-        const tx = await this.proxyContract.setPoolOperationPause(poolId, operation, paused)
+        const tx = await this.contract.setPoolOperationPause(poolId, operation, paused)
         await tx.wait()
 
         return tx
@@ -389,7 +521,7 @@ export class IStakingCall {
     }
 
     async setRewardsDeductionRate(poolId: number, rate: Amount) {
-        const tx = await this.proxyContract.setRewardsDeductionRate(poolId, rate)
+        const tx = await this.contract.setRewardsDeductionRate(poolId, rate)
         await tx.wait()
 
         return tx
@@ -406,7 +538,7 @@ export class IStakingCall {
     }
 
     async transferOwnership(newOwner: UserAddress) {
-        const tx = await this.proxyContract.transferOwnership(newOwner)
+        const tx = await this.contract.transferOwnership(newOwner)
         await tx.wait()
 
         return tx

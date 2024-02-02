@@ -2,7 +2,7 @@ import {expect, use} from 'chai';
 import { ethers } from "ethers";
 import { AcalaJsonRpcProvider } from "@acala-network/eth-providers";
 import { solidity } from 'ethereum-waffle';
-import { SA_DOT, ALICE_ETH, WTDOT, MAX_UINT_AMOUNT } from "../utils/config";
+import { ALICE_ETH, WTDOT, MAX_UINT_AMOUNT, ASSET_ADDRESS } from "../utils/config";
 import { IERC20Call } from '../call/IERC20Call';
 import { IWrappedTDOTCall } from "../call/IWrappedTDOT";
 import { BalanceLow, InsufficientAllowance, InvalidTDOT, InvalidWTDOT, WTDOTNotEnough } from '../utils/error';
@@ -16,8 +16,8 @@ describe('WrappedTDOT 合约测试', () => {
     );
     const AliceSigner = new ethers.Wallet(ALICE_ETH as string, provider)
     const iWrappedTDOTCall = new IWrappedTDOTCall(AliceSigner)
-    const iWTDOTCall = new IERC20Call(WTDOT as string, AliceSigner)
-    const iTDOTCall = new IERC20Call(SA_DOT as string, AliceSigner)
+    const iWTDOTCall = new IERC20Call(WTDOT, AliceSigner)
+    const iTDOTCall = new IERC20Call(ASSET_ADDRESS.TDOT, AliceSigner)
     const amount = ethers.BigNumber.from("1000000000000") // 1e12
 
     // before(async () => {

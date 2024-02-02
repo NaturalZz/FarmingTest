@@ -1,10 +1,17 @@
 import { BigNumber } from "ethers";
-import { DOT, LCDOT_13, LDOT, SA_DOT, WTDOT, } from "./config"
+import { ASSET_ADDRESS } from "./config";
+import { WTDOT } from "./config";
 
 export type ContractAddress = string;
 export type UserAddress = string;
 export type Amount = number | string | BigNumber
 export type BlockNumber = number | string
+
+export enum SupportedChainName {
+  MAINNET = 'MAINNET',
+  CHOPSTICKS = 'CHOPSTICKS',
+  MANDALA = 'MANDALA',
+}
 
 export enum Operation {
     Stake = 0,
@@ -28,16 +35,16 @@ interface Conversion {
 export const getConversion = (type: ConvertType): Conversion => {
     switch (type) {
       case ConvertType.LCDOT2LDOT:
-        return { from: LCDOT_13 as string, to: LDOT as string };
+        return { from: ASSET_ADDRESS.LCDOT, to: ASSET_ADDRESS.LDOT };
       case ConvertType.LCDOT2TDOT:
-        return { from: LCDOT_13 as string, to: SA_DOT as string };
+        return { from: ASSET_ADDRESS.LCDOT, to: ASSET_ADDRESS.TDOT };
       case ConvertType.DOT2LDOT:
-        return { from: DOT as string, to: LDOT as string };
+        return { from: ASSET_ADDRESS.DOT, to: ASSET_ADDRESS.LDOT };
       case ConvertType.DOT2TDOT:
-        return { from: DOT as string, to: SA_DOT as string };
+        return { from: ASSET_ADDRESS.DOT, to: ASSET_ADDRESS.TDOT };
       case ConvertType.LCDOT2WTDOT:
-        return { from: LCDOT_13 as string, to: WTDOT as string };
+        return { from: ASSET_ADDRESS.LCDOT, to: WTDOT };
       case ConvertType.DOT2WTDOT:
-        return { from: DOT as string, to: WTDOT as string };
+        return { from: ASSET_ADDRESS.DOT, to: WTDOT };
     }
 }

@@ -1,10 +1,10 @@
 import { ethers } from "ethers";
-import UpgradeableStakingLSDABI from './UpgradeableStakingLSD.json'
-import {PROXYCONTRACT} from "./utils/config";
+import UpgradeableStakingLSTABI from './UpgradeableStakingLST.json'
+import {ProxyAddress} from "./utils/config";
 
 // 连接到以太坊节点
 const provider = new ethers.providers.JsonRpcProvider("https://crosschain-dev.polkawallet.io:9909");
-const ProxyContract = new ethers.Contract(PROXYCONTRACT as any, UpgradeableStakingLSDABI, provider);
+const ProxyContract = new ethers.Contract(ProxyAddress as any, UpgradeableStakingLSTABI, provider);
 
 (async ()=>{
     try {

@@ -1,0 +1,153 @@
+[
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "euphratesAddr",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "stableAssetAddr",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "homaAddr",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "ldotAddr",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+    },
+    {
+        "inputs": [],
+        "name": "euphrates",
+        "outputs": [
+            {
+                "internalType": "contract IStakingTo",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "homa",
+        "outputs": [
+            {
+                "internalType": "contract IHoma",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "ldot",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint32",
+                "name": "stableAssetPoolId",
+                "type": "uint32"
+            },
+            {
+                "internalType": "uint256[]",
+                "name": "assetsAmount",
+                "type": "uint256[]"
+            },
+            {
+                "internalType": "contract IERC20",
+                "name": "stableAssetShareToken",
+                "type": "address"
+            },
+            {
+                "internalType": "contract IWrappedStableAssetShare",
+                "name": "wrappedShareToken",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "poolId",
+                "type": "uint256"
+            }
+        ],
+        "name": "mintAndStake",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "stableAsset",
+        "outputs": [
+            {
+                "internalType": "contract IStableAsset",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "contract IERC20",
+                "name": "stableAssetShareToken",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "amount",
+                "type": "uint256"
+            },
+            {
+                "internalType": "contract IWrappedStableAssetShare",
+                "name": "wrappedShareToken",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "poolId",
+                "type": "uint256"
+            }
+        ],
+        "name": "wrapAndStake",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    }
+]
