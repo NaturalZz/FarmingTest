@@ -1,10 +1,10 @@
 import { ethers } from "ethers";
 import { AcalaJsonRpcProvider } from '@acala-network/eth-providers';
 import UpgradeableStakingLSTABI from '../contracts/UpgradeableStakingLST.json'
-import { ProxyAddress } from "../utils/config";
+import { ASSET_ADDRESS, BLACK_HOLE, ProxyAddress } from "../utils/config";
 import { Operation, UserAddress, ContractAddress, Amount, BlockNumber, ConvertType } from "../utils/type";
-import { erc20ABI } from "./IERC20Call";
-import { getEvents, parseEvents } from "../utils/ethHelper";
+import { IERC20Call, erc20ABI } from "./IERC20Call";
+import { getEvmEvents, parseEvmEvents } from "../utils/ethHelper";
 import { getTokenInfo, getTokenName, ASSET } from "../utils/assets";
 import BigNumber from "bignumber.js";
 import { formatDecimal } from "../utils/decimal";
@@ -251,9 +251,9 @@ export class IStakingCall {
         return stakingIface.encodeFunctionData("stake", [poolId, amount]);
     }
 
-    async getStakes(startBlock: BlockNumber, endBlock: BlockNumber, filterPool?: number[]) {
+    async getStakes(startBlock: number, endBlock: number, filterPool?: number[]) {
         const filters = this.contract.filters.Stake()
-        const events = await getEvents(filters, startBlock, endBlock)
+        const events = await getEvmEvents(filters, startBlock, endBlock)
         const result: any[] = []
         events.forEach((log: any) => {
             const parsed = this.iface.parseLog({
@@ -273,7 +273,7 @@ export class IStakingCall {
         return result
     }
 
-    async getAccounts(startBlock: BlockNumber, endBlock: BlockNumber, filterPool: number[]) {
+    async getAccounts(startBlock: number, endBlock: number, filterPool: number[]) {
         const stakes = await this.getStakes(startBlock, endBlock, filterPool)
         const accounts: string[] = []
 
@@ -331,9 +331,9 @@ export class IStakingCall {
         return stakingIface.encodeFunctionData("claimRewards", [poolId]);
     }
 
-    async getClaimRewards(startBlock: BlockNumber, endBlock: BlockNumber, filterPools: number[]) {
+    async getClaimRewards(startBlock: number, endBlock: number, filterPools: number[]) {
         const filters = this.contract.filters.ClaimReward()
-        const events = await getEvents(filters, startBlock, endBlock)
+        const events = await getEvmEvents(filters, startBlock, endBlock)
         const result: any[] = []
         events.forEach((log: any) => {
             const parsed = this.iface.parseLog({
@@ -355,7 +355,7 @@ export class IStakingCall {
         return result
     }
 
-    async getTotalRewardPaid(startBlock: BlockNumber, endBlock: BlockNumber, prices: any, filterPools: number[]) {
+    async getTotalRewardPaid(startBlock: number, endBlock: number, prices: any, filterPools: number[]) {
         const accounts = await this.getAccounts(startBlock, endBlock, filterPools)
         const claimedRewards = await this.getClaimRewards(startBlock, endBlock, filterPools)
         console.log(accounts.length, claimedRewards.length);
@@ -438,9 +438,9 @@ export class IStakingCall {
         ]);
     }
 
-    async filterRewardRule(startBlock: BlockNumber, endBlock: BlockNumber, nowTime: number, filterPool: number[]) {
+    async filterRewardRule(startBlock: number, endBlock: number, nowTime: number, filterPool: number[]) {
         const filters = this.contract.filters.RewardRuleUpdate()
-        const events = await getEvents(filters, startBlock, endBlock)
+        const events = await getEvmEvents(filters, startBlock, endBlock)
         const classRule = filterPool.reduce((obj, item) => {
             obj[item] = []
             return obj

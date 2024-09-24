@@ -15,11 +15,11 @@ import { IStableAssetStakeUtilCall } from '../call/iStableAssetStakeUtilCall';
 
 use(solidity);
 
-describe('staking 合约测试', () => {
+describe('JitoSOL stake 合约测试', () => {
     const provider = new AcalaJsonRpcProvider(CURRENT_RPC);
     const AliceSigner = new ethers.Wallet(ALICE_ETH as string, provider)
     const TestSigner = new ethers.Wallet(TEST_ACCOUNT as string, provider)
-    const stakingV2Call = new IStakingLstV2Call(TestSigner)
+    const iStakingLstV2Call = new IStakingLstV2Call(TestSigner)
     const { ACA, DOT, LDOT, TDOT, LCDOT, WTUSD, TUSD, USDCet, USDT, JitoSOL } = ASSET_ADDRESS
     const ACACall = new IERC20Call(ACA, TestSigner)
     const DOTCall = new IERC20Call(DOT, TestSigner)
@@ -76,7 +76,7 @@ describe('staking 合约测试', () => {
             const { timestamp: stakeTime } = await provider.getBlock(stakeBlockNumber)
             // shareType的Call
             const fromErc20Call = new IERC20Call(shareType, TestSigner)
-            const { convertedShareType, convertedExchangeRate } = await stakingV2Call.convertInfos(poolIndex, stakeBlockNumber - 1)
+            const { convertedShareType, convertedExchangeRate } = await iStakingLstV2Call.convertInfos(poolIndex, stakeBlockNumber - 1)
             // 如果 convertedShareType不为黑洞地址，证明池子已经被转化过了            
             if (convertedShareType != BLACK_HOLE) {
                 const toErc20Call = new IERC20Call(convertedShareType, TestSigner)
@@ -85,14 +85,14 @@ describe('staking 合约测试', () => {
                 const [stakerBalanceBefore, stakingToBalanceBefore, sharesBefore, totalSharesBefore] = await Promise.all([
                     fromErc20Call.balanceOf(TestSigner.address, stakeBlockNumber - 1),
                     toErc20Call.balanceOf(ProxyAddress as string, stakeBlockNumber - 1),
-                    stakingV2Call.shares(poolIndex, TestSigner.address, stakeBlockNumber - 1),
-                    stakingV2Call.totalShares(poolIndex, stakeBlockNumber - 1),
+                    iStakingLstV2Call.shares(poolIndex, TestSigner.address, stakeBlockNumber - 1),
+                    iStakingLstV2Call.totalShares(poolIndex, stakeBlockNumber - 1),
                 ]);
                 const [stakerBalanceAfter, stakingToBalanceAfter, sharesAfter, totalSharesAfter] = await Promise.all([
                     fromErc20Call.balanceOf(TestSigner.address, stakeBlockNumber),
                     toErc20Call.balanceOf(ProxyAddress as string, stakeBlockNumber),
-                    stakingV2Call.shares(poolIndex, TestSigner.address, stakeBlockNumber),
-                    stakingV2Call.totalShares(poolIndex, stakeBlockNumber),
+                    iStakingLstV2Call.shares(poolIndex, TestSigner.address, stakeBlockNumber),
+                    iStakingLstV2Call.totalShares(poolIndex, stakeBlockNumber),
                 ]);
                 // 判断转化之后是不是WTDOT
                 const isWTDOT = ethers.utils.getAddress(convertedShareType) == ethers.utils.getAddress(WTDOT as string)
@@ -147,8 +147,8 @@ describe('staking 合约测试', () => {
                 ] = await Promise.all([
                     fromErc20Call.balanceOf(ProxyAddress as string, stakeBlockNumber - 1),
                     fromErc20Call.balanceOf(TestSigner.address, stakeBlockNumber - 1),
-                    stakingV2Call.shares(poolIndex, TestSigner.address, stakeBlockNumber - 1),
-                    stakingV2Call.totalShares(poolIndex, stakeBlockNumber - 1)
+                    iStakingLstV2Call.shares(poolIndex, TestSigner.address, stakeBlockNumber - 1),
+                    iStakingLstV2Call.totalShares(poolIndex, stakeBlockNumber - 1)
                 ])
 
                 const [
@@ -159,8 +159,8 @@ describe('staking 合约测试', () => {
                 ] = await Promise.all([
                     fromErc20Call.balanceOf(ProxyAddress as string, stakeBlockNumber),
                     fromErc20Call.balanceOf(TestSigner.address, stakeBlockNumber),
-                    stakingV2Call.shares(poolIndex, TestSigner.address, stakeBlockNumber),
-                    stakingV2Call.totalShares(poolIndex, stakeBlockNumber)
+                    iStakingLstV2Call.shares(poolIndex, TestSigner.address, stakeBlockNumber),
+                    iStakingLstV2Call.totalShares(poolIndex, stakeBlockNumber)
                 ])
     
                 expect(stakingBalanceBefore.eq(stakingBalanceAfter.sub(stakeAmount))).true
@@ -177,7 +177,7 @@ describe('staking 合约测试', () => {
             const { timestamp: stakeTime } = await provider.getBlock(stakeBlockNumber)
             // shareType的Call
             const fromErc20Call = new IERC20Call(shareType, TestSigner)
-            const { convertedShareType, convertedExchangeRate } = await stakingV2Call.convertInfos(poolIndex, stakeBlockNumber - 1)
+            const { convertedShareType, convertedExchangeRate } = await iStakingLstV2Call.convertInfos(poolIndex, stakeBlockNumber - 1)
             // 如果 convertedShareType不为黑洞地址，证明池子已经被转化过了
             console.log(convertedShareType);
             
@@ -189,17 +189,17 @@ describe('staking 合约测试', () => {
                     fromErc20Call.balanceOf(staker, stakeBlockNumber - 1),
                     fromErc20Call.balanceOf(receiver, stakeBlockNumber - 1),
                     toErc20Call.balanceOf(ProxyAddress, stakeBlockNumber - 1),
-                    stakingV2Call.shares(poolIndex, staker, stakeBlockNumber - 1),
-                    stakingV2Call.shares(poolIndex, receiver, stakeBlockNumber - 1),
-                    stakingV2Call.totalShares(poolIndex, stakeBlockNumber - 1),
+                    iStakingLstV2Call.shares(poolIndex, staker, stakeBlockNumber - 1),
+                    iStakingLstV2Call.shares(poolIndex, receiver, stakeBlockNumber - 1),
+                    iStakingLstV2Call.totalShares(poolIndex, stakeBlockNumber - 1),
                 ]);
                 const [stakerBalanceAfter, receiverBalanceAfter, stakingToBalanceAfter, stakerSharesAfter, receiverSharesAfter, totalSharesAfter] = await Promise.all([
                     fromErc20Call.balanceOf(staker, stakeBlockNumber),
                     fromErc20Call.balanceOf(receiver, stakeBlockNumber),
                     toErc20Call.balanceOf(ProxyAddress, stakeBlockNumber),
-                    stakingV2Call.shares(poolIndex, staker, stakeBlockNumber),
-                    stakingV2Call.shares(poolIndex, receiver, stakeBlockNumber),
-                    stakingV2Call.totalShares(poolIndex, stakeBlockNumber),
+                    iStakingLstV2Call.shares(poolIndex, staker, stakeBlockNumber),
+                    iStakingLstV2Call.shares(poolIndex, receiver, stakeBlockNumber),
+                    iStakingLstV2Call.totalShares(poolIndex, stakeBlockNumber),
                 ]);
                 // 判断转化之后是不是WTDOT
                 const isWTDOT = ethers.utils.getAddress(convertedShareType) == ethers.utils.getAddress(WTDOT as string)
@@ -255,9 +255,9 @@ describe('staking 合约测试', () => {
                     fromErc20Call.balanceOf(ProxyAddress, stakeBlockNumber - 1),
                     fromErc20Call.balanceOf(staker, stakeBlockNumber - 1),
                     fromErc20Call.balanceOf(receiver, stakeBlockNumber - 1),
-                    stakingV2Call.shares(poolIndex, staker, stakeBlockNumber - 1),
-                    stakingV2Call.shares(poolIndex, receiver, stakeBlockNumber - 1),
-                    stakingV2Call.totalShares(poolIndex, stakeBlockNumber - 1)
+                    iStakingLstV2Call.shares(poolIndex, staker, stakeBlockNumber - 1),
+                    iStakingLstV2Call.shares(poolIndex, receiver, stakeBlockNumber - 1),
+                    iStakingLstV2Call.totalShares(poolIndex, stakeBlockNumber - 1)
                 ])
 
                 const [
@@ -271,9 +271,9 @@ describe('staking 合约测试', () => {
                     fromErc20Call.balanceOf(ProxyAddress as string, stakeBlockNumber),
                     fromErc20Call.balanceOf(staker, stakeBlockNumber),
                     fromErc20Call.balanceOf(receiver, stakeBlockNumber),
-                    stakingV2Call.shares(poolIndex, staker, stakeBlockNumber),
-                    stakingV2Call.shares(poolIndex, receiver, stakeBlockNumber),
-                    stakingV2Call.totalShares(poolIndex, stakeBlockNumber)
+                    iStakingLstV2Call.shares(poolIndex, staker, stakeBlockNumber),
+                    iStakingLstV2Call.shares(poolIndex, receiver, stakeBlockNumber),
+                    iStakingLstV2Call.totalShares(poolIndex, stakeBlockNumber)
                 ])
     
                 // LST合约的shareType资产应该增加 stakeAmount
@@ -296,7 +296,7 @@ describe('staking 合约测试', () => {
             const { blockNumber: unstakeBlockNumber } = await provider.getTransaction(txHash) as { blockNumber : number }
             const { timestamp: unstakeTime } = await provider.getBlock(unstakeBlockNumber)
 
-            const { convertedShareType, convertedExchangeRate } = await stakingV2Call.convertInfos(poolIndex)
+            const { convertedShareType, convertedExchangeRate } = await iStakingLstV2Call.convertInfos(poolIndex)
             const isConvertedWTDOT = ethers.utils.getAddress(convertedShareType) == ethers.utils.getAddress(WTDOT)
 
             // shareType的Call 如果shareType=WTDOT或者convertedShareType=WTDOT || TDOT 那么赎回的应该是TDOT
@@ -323,15 +323,15 @@ describe('staking 合约测试', () => {
                 const [stakerBalanceBefore, stakingToBalanceBefore, sharesBefore, totalSharesBefore] = await Promise.all([
                     fromErc20Call.balanceOf(TestSigner.address, unstakeBlockNumber - 1),
                     toErc20Call.balanceOf(ProxyAddress as string, unstakeBlockNumber - 1),
-                    stakingV2Call.shares(poolIndex, TestSigner.address, unstakeBlockNumber - 1),
-                    stakingV2Call.totalShares(poolIndex, unstakeBlockNumber - 1),
+                    iStakingLstV2Call.shares(poolIndex, TestSigner.address, unstakeBlockNumber - 1),
+                    iStakingLstV2Call.totalShares(poolIndex, unstakeBlockNumber - 1),
                 ]);
 
                 const [stakerBalanceAfter, stakingToBalanceAfter, sharesAfter, totalSharesAfter] = await Promise.all([
                     fromErc20Call.balanceOf(TestSigner.address, unstakeBlockNumber),
                     toErc20Call.balanceOf(ProxyAddress as string, unstakeBlockNumber),
-                    stakingV2Call.shares(poolIndex, TestSigner.address, unstakeBlockNumber),
-                    stakingV2Call.totalShares(poolIndex, unstakeBlockNumber),
+                    iStakingLstV2Call.shares(poolIndex, TestSigner.address, unstakeBlockNumber),
+                    iStakingLstV2Call.totalShares(poolIndex, unstakeBlockNumber),
                 ]);
                 console.log("expectConvertedAmount", expectConvertedAmount.toString());
                 
@@ -354,8 +354,8 @@ describe('staking 合约测试', () => {
                 ] = await Promise.all([
                     fromErc20Call.balanceOf(ProxyAddress as string, unstakeBlockNumber - 1),
                     fromErc20Call.balanceOf(TestSigner.address, unstakeBlockNumber - 1),
-                    stakingV2Call.shares(poolIndex, TestSigner.address, unstakeBlockNumber - 1),
-                    stakingV2Call.totalShares(poolIndex, unstakeBlockNumber - 1)
+                    iStakingLstV2Call.shares(poolIndex, TestSigner.address, unstakeBlockNumber - 1),
+                    iStakingLstV2Call.totalShares(poolIndex, unstakeBlockNumber - 1)
                 ])
 
                 const [
@@ -366,8 +366,8 @@ describe('staking 合约测试', () => {
                 ] = await Promise.all([
                     fromErc20Call.balanceOf(ProxyAddress as string, unstakeBlockNumber),
                     fromErc20Call.balanceOf(TestSigner.address, unstakeBlockNumber),
-                    stakingV2Call.shares(poolIndex, TestSigner.address, unstakeBlockNumber),
-                    stakingV2Call.totalShares(poolIndex, unstakeBlockNumber)
+                    iStakingLstV2Call.shares(poolIndex, TestSigner.address, unstakeBlockNumber),
+                    iStakingLstV2Call.totalShares(poolIndex, unstakeBlockNumber)
                 ])
                 console.log(stakingBalanceBefore.toString(), stakingBalanceAfter.toString());
                 
@@ -407,227 +407,105 @@ describe('staking 合约测试', () => {
         }
         
         // done
-        describe.skip("质押资产 stake", () => {
-            // 之前的WTDOT池子不受改动影响
-            it.skip("之前的DOT-WTDOT池子stake应该正常 => should success", async () => {
-                // await iDOT.approve(ProxyAddress, MAX_UINT_AMOUNT)
-                // const tx = await stakingV2Call.stake(3, "50000000000")
-                // await checkStake(tx.hash, 3, DOT, "50000000000")
-                await checkStake("0x50d39e1f911c5d54af1a0115cdb1dc01e75b1de44d621487e537dd9e368bca7b", 3, DOT, "50000000000")
+        describe("质押资产 stake", () => {
+            // before(async () => {
+            //     await JitoSOLCall.approve(ProxyAddress, MAX_UINT_AMOUNT)
+            // })
+            it.skip("stake minBalance to JitoSOL Pool", async () => {
+                const tx = await iStakingLstV2Call.stake(7, "10000")
+                await checkStake(tx.hash, 7, JitoSOL, "10000")
             })
 
-            it.skip("之前的LCDOT-WTDOT池子stake应该正常 => should success", async () => {
-                const tx = await stakingV2Call.stake(1, "50000000000")
-                await checkStake(tx.hash, 1, LCDOT, "50000000000")
+            it.skip("stake less then minBalance to JitoSOL Pool", async () => {
+                const tx = await iStakingLstV2Call.stake(7, "9999")
+                await checkStake(tx.hash, 7, JitoSOL, "9999")
             })
 
-            // pass
-            it.skip("用户在不存在的池子stake. user stake in non-existent pool => should reject", async () => {
-                await expectRevert(stakingV2Call.stake(999, amount), PoolNotExist)
-            })
-    
-            // pass
-            it.skip("用户在存在的池子stake. user stake in existing pool => should success", async () => {
-                const tx = await stakingV2Call.stake(poolId, amount)
-                await checkStake(tx.hash, poolId, DOT as string, amount)
-            })
-    
-            it.skip("用户在存在的池子stake 0. => should reject", async () => {
-                await expectRevert(stakingV2Call.stake(poolId, 0), InvalidAmount)
-            })
-    
-            it.skip("用户未approve erc20时stake. => should reject", async () => {
-                await DOTCall.approve(ProxyAddress as string, 0)
-                expect((await DOTCall.allowance(TestSigner.address, ProxyAddress as string)).eq(0)).true
-                await expectRevert(stakingV2Call.stake(poolId, amount), InsufficientAllowance)
-    
-                // 还原approve
-                await DOTCall.approve(ProxyAddress as string, MAX_UINT_AMOUNT)
-                expect((await DOTCall.allowance(TestSigner.address, ProxyAddress as string)).eq(MAX_UINT_AMOUNT)).true
-            })
-    
-            it.skip("用户stake的金额大于自身资产. users pledge assets in excess of the balance in an existing pool => should reject", async () => {
-                await DOTCall.approve(ProxyAddress as string, MAX_UINT_AMOUNT)
-                expect((await DOTCall.allowance(TestSigner.address, ProxyAddress as string)).eq(MAX_UINT_AMOUNT)).true
-                const userBalance = await DOTCall.balanceOf(TestSigner.address)
-                const testAmount = userBalance.add(1)
-                await expectRevert(stakingV2Call.stake(poolId, testAmount), BalanceLow)
+            it.skip("stake 0 JitoSOL to JitoSOL Pool", async () => {
+                await expectRevert(iStakingLstV2Call.stake(7, 0), CannotStake0)
             })
 
-            // pass
-            it.skip("WTUSD池子 直接stake WTDOT", async () => {
-                const depositAmount = "1000000"
-                await iWTUSDCall.deposit(depositAmount)
-                const tx = await stakingV2Call.stake(WTUSDLstPool, depositAmount)
-                checkStake(tx.hash, WTUSDLstPool, WTUSD, depositAmount)
-                // checkStake("0x161c96cccbd188811afab553a7fd74e6e4f4f5196e14e5897b5c76a8d2edfffc", WTUSDLstPool, WTUSD, depositAmount)
+            it.skip("stake 0.000000001 JitoSOL to JitoSOL Pool", async () => {
+                const tx = await iStakingLstV2Call.stake(7, "1")
+                await checkStake(tx.hash, 7, JitoSOL, "1")
             })
 
-            it.skip("WTUSD池子 未approve时stake WTUSD", async () => {
-                const depositAmount = "1000000"
-                await iWTUSDCall.deposit(depositAmount)
-                await iWTUSDCall.approve(ProxyAddress, 0)
-                const tx = await stakingV2Call.stake(WTUSDLstPool, depositAmount)
-                // checkStake(tx.hash, WTUSDLstPool, WTUSD, depositAmount)
-                // checkStake("0x161c96cccbd188811afab553a7fd74e6e4f4f5196e14e5897b5c76a8d2edfffc", WTUSDLstPool, WTUSD, depositAmount)
+            it.skip("stake MAX JitoSOL to JitoSOL Pool", async () => {
+                const balance = (await JitoSOLCall.balanceOf(TestSigner.address)).toString()
+                const tx = await iStakingLstV2Call.stake(7, balance)
+                await checkStake(tx.hash, 7, JitoSOL, balance)
+                await iStakingLstV2Call.unstake(7, balance)
             })
 
-            it.skip("WTUSD池子 allowance < stake WTUSD", async () => {
-                const depositAmount = "1000000"
-                await iWTUSDCall.deposit(depositAmount)
-                await iWTUSDCall.approve(ProxyAddress, 999999)
-                const tx = await stakingV2Call.stake(WTUSDLstPool, depositAmount)
-                checkStake(tx.hash, WTUSDLstPool, WTUSD, depositAmount)
-                // checkStake("0x161c96cccbd188811afab553a7fd74e6e4f4f5196e14e5897b5c76a8d2edfffc", WTUSDLstPool, WTUSD, depositAmount)
+            it.skip("stake MAX JitoSOL - minBalance to JitoSOL Pool keep alive", async () => {
+                const balance = (await JitoSOLCall.balanceOf(TestSigner.address)).sub("10000").toString()
+                const tx = await iStakingLstV2Call.stake(7, balance)
+                await checkStake(tx.hash, 7, JitoSOL, balance)
+                await iStakingLstV2Call.unstake(7, balance)
             })
 
-            it.skip("WTDOT池子 allowance stake WTDOT", async () => {
-                const depositAmount = "10000000000"
-                // await iTDOTCall.approve(WTDOT, MAX_UINT_AMOUNT)
-                // await iWTDOTCall.deposit(depositAmount)
-                // await iWTDOTCall.approve(ProxyAddress, 9999999999)
-                const tx = await stakingV2Call.stake(WTDOTLstPool, depositAmount)
-                // checkStake(tx.hash, WTUSDLstPool, WTUSD, depositAmount)
-                // checkStake("0x161c96cccbd188811afab553a7fd74e6e4f4f5196e14e5897b5c76a8d2edfffc", WTUSDLstPool, WTUSD, depositAmount)
-            })
-
-            it.skip("用户未approve erc20时stake. => should reject", async () => {
-                await DOTCall.approve(ProxyAddress, 0)
-                expect((await DOTCall.allowance(TestSigner.address, ProxyAddress)).eq(0)).true
-                await stakingV2Call.stake(poolId, amount)
-                // await expectRevert()
-    
-                // // 还原approve
-                // await DOTCall.approve(ProxyAddress as string, MAX_UINT_AMOUNT)
-                // expect((await DOTCall.allowance(TestSigner.address, ProxyAddress as string)).eq(MAX_UINT_AMOUNT)).true
-            })
-        })
-
-        describe.skip("分享质押 stakeTo", () => {
-            // pass
-            it.skip("用户在不存在的池子stakeTo ⇒ revert: “invalid pool”", async () => {
-                await expectRevert(stakingV2Call.stakeTo(999, amount, AliceSigner.address), PoolNotExist)
-            })
-
-            // pass
-            it.skip("用户在存在的池子stakeTo ⇒ 正常", async () => {
-                const tx = await stakingV2Call.stakeTo(2, amount, AliceSigner.address)
-                await checkStakeTo(tx.hash, 2, DOT, amount, TestSigner.address, AliceSigner.address)
-            })
-
-            // pass
-            it.skip("用户在存在的池子stakeTo 0 ⇒  revert: “cannot stake 0”", async () => {
-                await expectRevert(stakingV2Call.stakeTo(2, 0, AliceSigner.address), InvalidAmount)
-            })
-
-            it.skip("当池子stake操作被暂停时 stake ⇒ 操作被revert", async () => {
+            it("stake MAX JitoSOL - minBalance - 0.000000001 to JitoSOL Pool, no keep alive", async () => {
+                const balance = (await JitoSOLCall.balanceOf(TestSigner.address)).sub("9999").toString()
+                console.log(balance);
+                const tx = await iStakingLstV2Call.stake(7, balance)
+                console.log((await JitoSOLCall.balanceOf(TestSigner.address)).toString());
                 
-            })
-
-            it.skip("当合约暂停stake操作时 stake ⇒ revert: “”", async () => {
-                
-            })
-
-            it.skip("已转化却未设置convertor的池子 stake ⇒ revert: “pool convertor is not set”", async () => {
-                
+                await checkStake(tx.hash, 7, JitoSOL, balance)
+                // await iStakingLstV2Call.unstake(7, balance)
             })
         })
 
         describe.skip("取消质押资产 unstake", () => {
             let staked: ethers.BigNumber
-            // before(async () => {
-            //     staked = await stakingV2Call.shares(poolId, TestSigner.address)
-            //     if (staked.eq(0)) {
-            //         await stakingV2Call.stake(poolId, amount)
-            //         staked = ethers.BigNumber.from(amount)
-            //     }
-            //     console.log("share", staked.toString());
-            // })
-
-            it.skip("不存在的池子发起unstake => should reject", async () => {
-                await expectRevert(stakingV2Call.unstake(999, amount), PoolNotExist)
+            before(async () => {
+                staked = await iStakingLstV2Call.shares(7, TestSigner.address)
+                console.log("share", staked.toString());
+                if (staked.eq(0)) {
+                    await iStakingLstV2Call.stake(7, "1000000000")
+                }
             })
 
             it.skip("用户unstake 0 => should reject", async () => {
-                await expectRevert(stakingV2Call.unstake(poolId, 0), CannotUnstakeZero)
+                await expectRevert(iStakingLstV2Call.unstake(7, 0), CannotUnstakeZero)
+            })
+
+            it.skip("unstake minBalance", async () => {
+                const tx = await iStakingLstV2Call.unstake(7, "10000")
+                await checkUnstake(tx.hash, 7, JitoSOL, "10000")
+                staked = staked.sub("10000")
+            })
+
+            it.skip("unstake 0.000000001", async () => {
+                const tx = await iStakingLstV2Call.unstake(7, "1")
+                await checkUnstake(tx.hash, 7, JitoSOL, "1")
+                staked = staked.sub("1")
             })
 
             it.skip("unstake 大于 stake的资产", async () => {
                 console.log(staked.add(1).toString());
-                await expectRevert(stakingV2Call.unstake(poolId, staked.add(1)), ShareNotEnough)
+                await expectRevert(iStakingLstV2Call.unstake(7, staked.add(1)), ShareNotEnough)
             })
 
             it.skip("unstake 小与 stake的资产", async () => {
                 const stakeAmount = staked.div(2)
-                const tx = await stakingV2Call.unstake(poolId, stakeAmount)
-                await checkUnstake(tx.hash, poolId, DOT as string, stakeAmount)
+                const tx = await iStakingLstV2Call.unstake(7, stakeAmount)
+                await checkUnstake(tx.hash, 7, JitoSOL, stakeAmount)
                 staked = stakeAmount
             })
 
-            it.skip("unstake 等于 stake的资产", async () => {
-                const tx = await stakingV2Call.unstake(poolId, staked)
-                await checkUnstake(tx.hash, poolId, DOT as string, staked)
-                const shareAfter = await stakingV2Call.shares(poolId, TestSigner.address)
+            it.skip("unstake all", async () => {
+                const tx = await iStakingLstV2Call.unstake(7, staked)
+                await checkUnstake(tx.hash, 7, JitoSOL, staked)
+                const shareAfter = await iStakingLstV2Call.shares(7, TestSigner.address)
                 staked = shareAfter
             })
 
             it.skip("未抵押资产发起unstake", async () => {
                 if (!staked.isZero()) {
-                    await stakingV2Call.unstake(poolId, staked)
+                    await iStakingLstV2Call.unstake(7, staked)
                 }
 
-                await expectRevert(stakingV2Call.unstake(poolId, 1), ShareNotEnough)
-            })
-
-            it.skip("WTUSD unstake min 1 => should success", async () => {
-                // const assetsAmount = [1000000, 1000000]
-                // await iStableAssetStakeUtilCall.mintAndStake(WTUSDStablePool, assetsAmount, TUSD, WTUSD, WTUSDLstPool)
-
-                const unstakeTx = await stakingV2Call.unstake(WTUSDLstPool, 1)
-                const withdrawTx = await iWTUSDCall.withdraw(1)
-
-                await checkUnstake(unstakeTx.hash, WTUSDLstPool, WTUSD, 1)
-                await checkWrappedWithdraw(withdrawTx.hash, iTUSDCall, iWTUSDCall, 1)
-                // await checkUnstake("0xb6326801e7914876341477fcdc349432d86f72d736fcad98d9991bb7bfd92dad", WTUSDLstPool, WTUSD, "6030000")
-                // await checkWrappedWithdraw("0xd1d196a206e0279019ebc8336a4084afcdd48a4a6363bcdac9c0817fa194b054", iTUSDCall, iWTUSDCall, "6030000")
-            })
-
-            it.skip("WTUSD unstake all => should success", async () => {
-                // const assetsAmount = [1000000, 1000000]
-                // await iStableAssetStakeUtilCall.mintAndStake(WTUSDStablePool, assetsAmount, TUSD, WTUSD, WTUSDLstPool)
-                const shares = (await stakingV2Call.shares(WTUSDLstPool, TestSigner.address)).toString()
-                
-                const unstakeTx = await stakingV2Call.unstake(WTUSDLstPool, shares)
-                const withdrawTx = await iWTUSDCall.withdraw(shares)
-
-                await checkUnstake(unstakeTx.hash, WTUSDLstPool, WTUSD, shares)
-                await checkWrappedWithdraw(withdrawTx.hash, iTUSDCall, iWTUSDCall, shares)
-                // await checkUnstake("0xb6326801e7914876341477fcdc349432d86f72d736fcad98d9991bb7bfd92dad", WTUSDLstPool, WTUSD, "6030000")
-                // await checkWrappedWithdraw("0xd1d196a206e0279019ebc8336a4084afcdd48a4a6363bcdac9c0817fa194b054", iTUSDCall, iWTUSDCall, "6030000")
-            })
-
-            it.skip("WTDOT unstake all => should success", async () => {
-                const assetsAmount = ["10000000000", "10000000000"]
-                await iStableAssetStakeUtilCall.mintAndStake(WTDOTStablePool, assetsAmount, TDOT, WTDOT, WTDOTLstPool)
-                const shares = (await stakingV2Call.shares(WTDOTLstPool, TestSigner.address)).toString()
-
-                const unstakeTx = await stakingV2Call.unstake(WTDOTLstPool, shares)
-                const withdrawTx = await iWTDOTCall.withdraw(shares)
-
-                await checkUnstake(unstakeTx.hash, WTDOTLstPool, WTDOT, shares)
-                await checkWrappedWithdraw(withdrawTx.hash, iTDOTCall, iWTDOTCall, shares)
-                // await checkWrappedWithdraw("0xf997fd27b9ef2b308d410a10e05dc2a57b9f0dceca34e5674e2c2d65ab6568e1", iTDOTCall, iWTDOTCall, "22124207424")
-            })
-
-            it.skip("WTDOT unstake min 1 => should success", async () => {
-                const assetsAmount = ["10000000000", "10000000000"]
-                await iStableAssetStakeUtilCall.mintAndStake(WTDOTStablePool, assetsAmount, TDOT, WTDOT, WTDOTLstPool)
-
-                const unstakeTx = await stakingV2Call.unstake(WTDOTLstPool, 1)
-                const withdrawTx = await iWTDOTCall.withdraw(1)
-
-                await checkUnstake(unstakeTx.hash, WTDOTLstPool, WTDOT, 1)
-                await checkWrappedWithdraw(withdrawTx.hash, iTDOTCall, iWTDOTCall, 1)
+                await expectRevert(iStakingLstV2Call.unstake(7, 1), ShareNotEnough)
             })
         })
     })

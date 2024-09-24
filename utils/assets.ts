@@ -99,7 +99,28 @@ export const ASSET_METADATAS: ASSET[] = [
     decimals: 10,
     minimalBalance: '10000',
     contract: ASSET_ADDRESS[TokenSymbol.LDOT_L]
-  }
+  },
+  {
+    name: 'Jito Staked SOL',
+    symbol: TokenSymbol.JitoSOL,
+    decimals: 9,
+    minimalBalance: '10000',
+    contract: ASSET_ADDRESS[TokenSymbol.JitoSOL]
+  },
+  {
+    name: 'JTO',
+    symbol: TokenSymbol.JTO,
+    decimals: 9,
+    minimalBalance: '10000',
+    contract: ASSET_ADDRESS[TokenSymbol.JTO]
+  },
+  {
+    name: 'LDOT_JitoSOL_LP',
+    symbol: TokenSymbol.LDOT_JitoSOL_LP,
+    decimals: 10,
+    minimalBalance: '10000',
+    contract: ASSET_ADDRESS[TokenSymbol.LDOT_JitoSOL_LP]
+  },
 ];
   
 export const NATIVE_TOKEN = ASSET_METADATAS.find((asset) => asset.symbol === TokenSymbol.ACA)!;

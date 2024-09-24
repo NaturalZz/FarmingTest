@@ -5,7 +5,8 @@ export const PoolNotExist = "invalid pool"
 export const CannotStake0 = "cannot stake 0"
 export const InsufficientAllowance = "insufficient allowance"
 export const BalanceLow = "Multicurrency Transfer failed: BalanceTooLow"
-export const TransferAmountExceeds = "transfer amount exceeds allowance" // execution reverted: ERC20: transfer amount exceeds allowance
+export const TransferAmountExceedsAllowance = "ERC20: transfer amount exceeds allowance" // execution reverted: ERC20: transfer amount exceeds allowance
+export const TransferAmountExceedsBalance = "ERC20: transfer amount exceeds balance"
 // unstake
 export const CannotUnstakeZero = "cannot unstake 0"
 export const ShareNotEnough = "share not enough"
@@ -44,3 +45,18 @@ export const ZeroWrapped = "zero wrapped share amount is not allowed"
 export const ZeroShare = "zero share amount is not allowed"
 // Convertor
 export const InvalidAmount= "invalid input amount"
+// DexStakeUtil
+export const InvalidTradingPair = "DEXStakeUtil: invalid trading pair"
+export const InvalidPool = "DEXStakeUtil: invalid pool"
+export const DexInvalidAmount = "DEXStakeUtil: invalid amount"
+export const InvalidSwapPathLength = "DEXStakeUtil: invalid swap path length"
+export const InvalidSwapPath = "DEXStakeUtil: invalid swap path"
+export const InvalidSwapAmount = "DEXStakeUtil: invalid swap amount"
+export const TokenAIsZeroAddress = "DEX: tokenA is zero address"
+export const TokenBIsZeroAddress = "DEX: tokenB is zero address"
+// DEXV2
+export const DexProvisionPoolNotExist = "DEX AddProvision failed: MustBeProvisioning"
+export const DexTokenAIsZeroAddress = "DEX: tokenA is zero address"
+export const DexTokenBIsZeroAddress = "DEX: tokenB is zero address"
+export const DexInvalidContributionAmount = "DEX: invalid contribution amount"
+export const InvalidContributionIncrement = "DEX AddProvision failed: InvalidContributionIncrement"

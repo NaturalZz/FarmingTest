@@ -251,11 +251,15 @@ export const getTokenPrices = async (
       [TokenSymbol.LCDOT]: formatDecimal(lcDotPrice, -18),
       [TokenSymbol.TAI]: formatDecimal(tai.price, -18),
       [TokenSymbol.USDCet]: '0',
+      [TokenSymbol.USDC]: '0',
       [TokenSymbol.USDT]: '0',
-      [TokenSymbol.TUSD]: '0',
-      [TokenSymbol.WTUSD]: '0',
+      [TokenSymbol.TUSD]: '1',
+      [TokenSymbol.WTUSD]: '1',
       [TokenSymbol.DOT_L]: formatDecimal(dotPrice, -18),
       [TokenSymbol.LDOT_L]: formatDecimal(ldotPrice, -18),
+      [TokenSymbol.JitoSOL]: '0',
+      [TokenSymbol.JTO]: '0',
+      [TokenSymbol.LDOT_JitoSOL_LP]: '0'
     },
   };
 };

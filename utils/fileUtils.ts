@@ -36,6 +36,26 @@ export function convertJsonToExcel(data: any, filePath: string): void {
 
   // 保存工作簿为 Excel 文件
   xlsx.writeFile(workbook, filePath);
-  console.log("123");
+}
+
+export function loadJsonFile(filePath: string) {
+  return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+}
+
+export function loadCsvFile(filePath: string) {
+  // 读取CSV文件
+  const workbook = xlsx.readFile(filePath, { type: 'buffer' });
   
+  // 获取工作表名称
+  const sheetName = workbook.SheetNames[0];
+  
+  // 获取工作表内容
+  const worksheet = workbook.Sheets[sheetName];
+  
+  // 将工作表转换为JSON对象数组
+  const jsonData = xlsx.utils.sheet_to_json(worksheet, {
+    raw: false,
+    defval: ""
+  });
+  return jsonData
 }

@@ -1,7 +1,7 @@
 import { ethers } from "ethers";
 import StableAssetStakeUtilABI from '../contracts/StableAssetStakeUtil.json'
 import { StableAssetStakeUtil } from "../utils/config";
-import { Amount, BlockNumber, ContractAddress } from "../utils/type";
+import { BlockNumber, ContractAddress } from "../utils/type";
 
 const IStableAssetStakeUtil = new ethers.utils.Interface(StableAssetStakeUtilABI);
 

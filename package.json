@@ -6,11 +6,16 @@
   "dependencies": {
     "@acala-network/api": "^6.0.0",
     "@acala-network/eth-providers": "^2.7.7",
-    "@acala-network/sdk": "^4.1.9-8",
-    "@acala-network/sdk-core": "^4.1.9-8",
-    "@acala-network/sdk-stable-asset": "^1.2.8",
+    "@acala-network/sdk": "4.1.9-13",
+    "@acala-network/sdk-core": "4.1.9-13",
+    "@acala-network/sdk-loan": "4.1.9-13",
+    "@acala-network/sdk-stable-asset": "1.3.3",
+    "@acala-network/sdk-swap": "4.1.9-13",
+    "@acala-network/types": "^6.0.0-34",
     "@babel/runtime": "^7.22.15",
+    "@duneanalytics/client-sdk": "^0.1.5",
     "@polkadot/api": "^10.9.1",
+    "@solana/web3.js": "^1.95.0",
     "@types/chai": "^4.3.5",
     "@types/mocha": "^10.0.1",
     "axios": "^1.5.0",
@@ -39,6 +44,8 @@
     "wrappedTDOT": "mocha ./testCase/wrappedTDOTCase.test.ts",
     "wrappedTUSD": "mocha ./testCase/wrappedTUSDCase.test.ts",
     "stableAssetStakeUtil": "mocha ./testCase/stableAssetStakeUtilCase.test.ts",
-    "lendingPool": "mocha ./testCase/lendingPoolCase.test.ts"
+    "lendingPool": "mocha ./testCase/lendingPoolCase.test.ts",
+    "dexStakeUtil": "mocha ./testCase/dexStakeUtil.test.ts"
+
   }
 }

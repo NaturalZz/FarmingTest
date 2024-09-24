@@ -5,7 +5,7 @@ import { solidity } from 'ethereum-waffle';
 import { TEST_ACCOUNT, MAX_UINT_AMOUNT, ASSET_ADDRESS, CURRENT_RPC, BLACK_HOLE, ProxyAddress, StableAssetStakeUtil } from "../utils/config";
 import { IERC20Call } from '../call/IERC20Call';
 import { IWrappedTDOTCall } from "../call/IWrappedTDOT";
-import { BalanceLow, ExistentialDeposit, InsufficientAllowance, InvalidStableAssetPool, InvalidTDOT, InvalidWTDOT, PoolNotExist, StableAssetMintFailed, TransferAmountExceeds, WTDOTNotEnough, ZeroMinted, ZeroShare } from '../utils/error';
+import { BalanceLow, ExistentialDeposit, InsufficientAllowance, InvalidStableAssetPool, InvalidTDOT, InvalidWTDOT, PoolNotExist, StableAssetMintFailed, TransferAmountExceedsAllowance, WTDOTNotEnough, ZeroMinted, ZeroShare } from '../utils/error';
 import { expectRevert } from '../utils/expectRevert';
 import { IWrappedTUSDCall } from '../call/IWrappedTUSD';
 import { IStableAssetStakeUtilCall } from '../call/iStableAssetStakeUtilCall';
@@ -32,7 +32,7 @@ describe('StableAssetStakeUtil 合约测试', () => {
     const iLDOT = new IERC20Call(LDOT, TestSinger)
 
     const iStableAssetStakeUtilCall = new IStableAssetStakeUtilCall(TestSinger)
-    const iStakingLstV2Call = new IStakingLstV2Call(TestSinger)
+    const iStakingLstV2Call = new IStakingLstV2Call(provider)
 
     const WTDOTStablePool = 0
     const WTUSDStablePool = 1
@@ -106,7 +106,7 @@ describe('StableAssetStakeUtil 合约测试', () => {
             const assetsAmount = [1000000, 1000000]
             // await iUSDCet.approve(StableAssetStakeUtil, 0)
             // await iUSDT.approve(StableAssetStakeUtil, MAX_UINT_AMOUNT)
-            await expectRevert(iStableAssetStakeUtilCall.mintAndStake(WTUSDStablePool, assetsAmount, TUSD, WTUSD, WTUSDLstPool), TransferAmountExceeds)
+            await expectRevert(iStableAssetStakeUtilCall.mintAndStake(WTUSDStablePool, assetsAmount, TUSD, WTUSD, WTUSDLstPool), TransferAmountExceedsAllowance)
         })
 
         it.skip("mintAndStake assetsAmount 第一个资产为0且未approve时 => should success", async () => {

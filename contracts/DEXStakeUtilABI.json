@@ -1,0 +1,142 @@
+[
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "euphratesAddr",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "dexAddr",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "contract IERC20",
+                "name": "tokenA",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "amountA",
+                "type": "uint256"
+            },
+            {
+                "internalType": "contract IERC20",
+                "name": "tokenB",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "amountB",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "minShareAmount",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "poolId",
+                "type": "uint256"
+            }
+        ],
+        "name": "addLiquidityAndStake",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "dex",
+        "outputs": [
+            {
+                "internalType": "contract IDEX",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "euphrates",
+        "outputs": [
+            {
+                "internalType": "contract IStakingTo",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "contract IERC20",
+                "name": "tokenA",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "amountA",
+                "type": "uint256"
+            },
+            {
+                "internalType": "contract IERC20",
+                "name": "tokenB",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "amountB",
+                "type": "uint256"
+            },
+            {
+                "internalType": "address[]",
+                "name": "swapPath",
+                "type": "address[]"
+            },
+            {
+                "internalType": "uint256",
+                "name": "swapAmount",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "minShareAmount",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "poolId",
+                "type": "uint256"
+            }
+        ],
+        "name": "swapAndAddLiquidityAndStake",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    }
+]

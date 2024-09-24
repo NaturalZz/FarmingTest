@@ -28,7 +28,7 @@ export class Suite {
     this.maxBatchTxNum = value;
   }
 
-  async connect(endpoint: string = 'ws://localhost:9944') {
+  async connect(endpoint: string[] = ['ws://localhost:9944']) {
     await cryptoWaitReady();
 
     // use alice for the default sudo account

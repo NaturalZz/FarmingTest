@@ -1,4 +1,4 @@
-import { ethers, providers } from "ethers";
+import { ethers } from "ethers";
 import { UserAddress, ContractAddress, Amount, BlockNumber } from "../utils/type";
 
 // ERC-20代币合约ABI的字符串表示

@@ -1,5 +1,5 @@
 import dotenv from "dotenv";
-import { SupportedChainName } from "./type";
+import { CHAIN_IDS, SupportedChainName } from "./type";
 dotenv.config()
 
 export const CURRENT_CHAIN_NAME = process.env.CURRENT_CHAIN_NAME as unknown as SupportedChainName
@@ -13,7 +13,8 @@ export const HOMA = '0x0000000000000000000000000000000000000805'
 
 export const RPC_URL: { [key in SupportedChainName]: string } = {
   [SupportedChainName.MAINNET]: 'https://eth-rpc-acala.aca-api.network/',
-  [SupportedChainName.CHOPSTICKS]: 'https://crosschain-dev.polkawallet.io/forkAcala/',
+  // [SupportedChainName.CHOPSTICKS]: 'https://crosschain-dev.polkawallet.io/forkAcala/',
+  [SupportedChainName.CHOPSTICKS]: 'https://crosschain-dev.polkawallet.io/chopsticksAcalaRpc/',
   [SupportedChainName.MANDALA]: 'https://eth-rpc-tc9.aca-staging.network',
 };
 export const BLOCKSCOUT_API = {
@@ -37,15 +38,27 @@ export const WTDOT = {
   [SupportedChainName.MANDALA]: '0x0a4ba1E120287CD8585226ce7eF57b1E773e1640',
 }[CURRENT_CHAIN_NAME];
 export const WTUSD = {
-  [SupportedChainName.MAINNET]: '0xe381a3d153293a81dd26c3e6ead18c74979e5eb5',
-  [SupportedChainName.CHOPSTICKS]: '0xe381a3d153293a81dd26c3e6ead18c74979e5eb5',
-  [SupportedChainName.MANDALA]: '0xe381a3d153293a81dd26c3e6ead18c74979e5eb5',
+  [SupportedChainName.MAINNET]: '0xe8241c59abfac0168637e3a8749c44a9d64291d3',
+  [SupportedChainName.CHOPSTICKS]: '0xe8241c59abfac0168637e3a8749c44a9d64291d3',
+  [SupportedChainName.MANDALA]: '0xe8241c59abfac0168637e3a8749c44a9d64291d3',
 }[CURRENT_CHAIN_NAME];
 export const StableAssetStakeUtil = {
-  [SupportedChainName.MAINNET]: '0x2f5abfe6621f629258460e636528da87c115a4b9',
-  [SupportedChainName.CHOPSTICKS]: '0x2f5abfe6621f629258460e636528da87c115a4b9',
-  [SupportedChainName.MANDALA]: '0x2f5abfe6621f629258460e636528da87c115a4b9',
+  [SupportedChainName.MAINNET]: '0xc9a90cb6a2fc63babc93f08ea30b1c056f66461d',
+  [SupportedChainName.CHOPSTICKS]: '0xc9a90cb6a2fc63babc93f08ea30b1c056f66461d',
+  [SupportedChainName.MANDALA]: '0xc9a90cb6a2fc63babc93f08ea30b1c056f66461d',
 }[CURRENT_CHAIN_NAME];
+export const Lottery = {
+  [SupportedChainName.MAINNET]: '0xfC5E479D4d226bF536CB91E427752A976E334BC9',
+  [SupportedChainName.CHOPSTICKS]: '0xfC5E479D4d226bF536CB91E427752A976E334BC9',
+  [SupportedChainName.MANDALA]: '0x104d8015F8478d145aeDD167cB76A8bB3B06078D',
+}[CURRENT_CHAIN_NAME];
+export const AcalaPoint = {
+  [SupportedChainName.MAINNET]: '0xA2F2b69ab4724D93250b0ad682af47581846a15b',
+  [SupportedChainName.CHOPSTICKS]: '0xA2F2b69ab4724D93250b0ad682af47581846a15b',
+  [SupportedChainName.MANDALA]: '0x7Bc37234E333007c6a03A7a448F60A2eC24cf72b',
+}[CURRENT_CHAIN_NAME];
+export const Dex = '0x0000000000000000000000000000000000000803'
+export const DexStakeUtil = '0xd3ba2aa7dfd7d6657d5947f3870a636c7351efe4'
 
 export const ACALA_API_ENDPOINTS = {
   [SupportedChainName.MAINNET]: {
@@ -82,11 +95,15 @@ export enum TokenSymbol {
   KSM = 'KSM',
   TAI = 'TAI',
   USDCet = 'USDCet',
+  USDC = 'USDC',
   USDT = 'USDT',
   TUSD = 'TUSD',
   WTUSD = 'WTUSD',
   DOT_L = 'DOT_L',
-  LDOT_L = 'LDOT_L'
+  LDOT_L = 'LDOT_L',
+  JitoSOL = 'JitoSOL',
+  JTO = 'JTO',
+  LDOT_JitoSOL_LP = 'LDOT_JitoSOL_LP'
 }
 
 export const ASSET_ADDRESS = {
@@ -96,13 +113,17 @@ export const ASSET_ADDRESS = {
   [TokenSymbol.LDOT]: '0x0000000000000000000100000000000000000003',
   [TokenSymbol.DOT]: '0x0000000000000000000100000000000000000002',
   [TokenSymbol.USDCet]: '0x07df96d1341a7d16ba1ad431e2c847d978bc2bce',
+  [TokenSymbol.USDC]: '0x000000000000000000050000000000000000000e',
   [TokenSymbol.USDT]: '0x000000000000000000050000000000000000000c',
   [TokenSymbol.TUSD]: '0x0000000000000000000300000000000000000001',
   [TokenSymbol.WTUSD]: WTUSD,
   [TokenSymbol.TAI]: TAI,
   [TokenSymbol.WTDOT]: WTDOT,
   [TokenSymbol.DOT_L]: '0x2a43c0d689fDBde50a78C36Ab8067cc890c9fb5e',
-  [TokenSymbol.LDOT_L]: '0xB58CB2e345E9FF3484aEAcE7595ff2334328C6b1'
+  [TokenSymbol.LDOT_L]: '0xB58CB2e345E9FF3484aEAcE7595ff2334328C6b1',
+  [TokenSymbol.JitoSOL]: '0xa7fb00459f5896c3bd4df97870b44e868ae663d7',
+  [TokenSymbol.JTO]: '0xfd2Df5229c24F8AfFe4b0DB150e8a0027AE50B6B',
+  [TokenSymbol.LDOT_JitoSOL_LP]: '0x00000000000000000002000000000301a7fb0045'
 }
 
 // export const Convertors = {
@@ -167,3 +188,4 @@ export const AVERAGE_BLOCK_TIME = 12
 export const PER_DAY_SEC = 86400
 
 export const CURRENT_RPC = RPC_URL[CURRENT_CHAIN_NAME]
+export const CURRENT_CHAIN_ID = CHAIN_IDS[CURRENT_CHAIN_NAME]

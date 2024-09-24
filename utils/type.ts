@@ -13,6 +13,22 @@ export enum SupportedChainName {
   MANDALA = 'MANDALA',
 }
 
+export enum SupportedChainId {
+  MAINNET = 787,
+  MANDALA = 595,
+}
+
+export const CHAIN_IDS = {
+  [SupportedChainName.MAINNET]: SupportedChainId.MAINNET,
+  [SupportedChainName.CHOPSTICKS]: SupportedChainId.MAINNET,
+  [SupportedChainName.MANDALA]: SupportedChainId.MANDALA,
+};
+
+export const GENESIS_HASH = {
+  [SupportedChainId.MAINNET]: '0xfc41b9bd8ef8fe53d58c7ea67c794c7ec9a73daf05e6d54b14ff6342c99ba64c',
+  [SupportedChainId.MANDALA]: '0x3035b88c212be330a1a724c675d56d53a5016ec32af1790738832db0227ac54c',
+};
+
 export enum Operation {
     Stake = 0,
     Unstake = 1,
